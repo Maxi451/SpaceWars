@@ -11,11 +11,10 @@ import org.bukkit.util.Vector;
 
 import it.tristana.commons.arena.loader.BasicArenaLoader;
 import it.tristana.commons.interfaces.arena.player.PartiesManager;
-import it.tristana.commons.math.CachedCircleEuclidean;
 import it.tristana.spacewars.Main;
 import it.tristana.spacewars.arena.Nexus;
 import it.tristana.spacewars.arena.SpaceArena;
-import it.tristana.spacewars.arena.powerup.CirclePowerup;
+import it.tristana.spacewars.arena.powerup.SpherePowerup;
 import it.tristana.spacewars.config.ArenaValues;
 
 public class SpaceArenaLoader extends BasicArenaLoader<SpaceArena> {
@@ -23,7 +22,6 @@ public class SpaceArenaLoader extends BasicArenaLoader<SpaceArena> {
 	private static final String NEXUSES = "nexuses";
 	private static final String SPAWNPOINTS = "spawnpoints";
 	private static final String POWERUPS = "powerups";
-	private static final String ROTATION = "rotation";
 	private static final String LOW_POS = "low-pos";
 	private static final String HIGH_POS = "high-pos";
 	
@@ -62,9 +60,9 @@ public class SpaceArenaLoader extends BasicArenaLoader<SpaceArena> {
 			}
 			currentSection = fileConfiguration.getConfigurationSection(root + POWERUPS);
 			if (currentSection != null) {
-				sub = root + ROTATION + ".";
+				sub = root + POWERUPS + ".";
 				for (String key : currentSection.getKeys(false)) {
-					arena.addPowerupCircle(getLocation(sub + key, world), Double.parseDouble(fileConfiguration.getString(sub + key + "." + ROTATION)));
+					arena.addPowerup(getLocation(sub + key, world));
 				}
 			}
 			currentSection = fileConfiguration.getConfigurationSection(root + LOW_POS);
@@ -98,10 +96,8 @@ public class SpaceArenaLoader extends BasicArenaLoader<SpaceArena> {
 		}
 		sub = root + POWERUPS + ".";
 		counter = 0;
-		for (CirclePowerup circlePowerup : arena.getPowerupsCircles()) {
-			CachedCircleEuclidean circle = circlePowerup.getCircle();
-			setLocation(sub + counter, circle.getCenter());
-			set(sub + counter + "." + ROTATION, circle.getRotation());
+		for (SpherePowerup powerup : arena.getPowerups()) {
+			setLocation(sub + counter, powerup.getSphere().getCenter());
 		}
 		setVector(root + LOW_POS + ".", arena.getLowerPos());
 		setVector(root + HIGH_POS + ".", arena.getUpperPos());

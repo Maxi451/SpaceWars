@@ -22,16 +22,15 @@ import it.tristana.commons.helper.TeamsColors;
 import it.tristana.commons.interfaces.arena.player.PartiesManager;
 import it.tristana.commons.interfaces.util.Status;
 import it.tristana.commons.interfaces.util.VillagerShop;
-import it.tristana.commons.math.CachedCircleEuclidean;
-import it.tristana.commons.math.CircleEuclideanHelper;
+import it.tristana.commons.math.CachedSphere;
+import it.tristana.commons.math.SphereHelper;
 import it.tristana.spacewars.Main;
 import it.tristana.spacewars.arena.combact.HomingMissile;
 import it.tristana.spacewars.arena.combact.MissilesManager;
 import it.tristana.spacewars.arena.combact.ShotManager;
 import it.tristana.spacewars.arena.kit.CombactClass;
-import it.tristana.spacewars.arena.powerup.CirclePowerup;
+import it.tristana.spacewars.arena.powerup.SpherePowerup;
 import it.tristana.spacewars.config.ArenaValues;
-import it.tristana.spacewars.helper.AabbHelper;
 
 public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> {
 
@@ -46,9 +45,8 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> {
 	private Main plugin;
 	private ShotManager shotManager;
 
-	private CircleEuclideanHelper circleEuclideanHelper;
 	private MissilesManager missilesManager;
-	private List<CirclePowerup> powerups;
+	private List<SpherePowerup> powerups;
 	private List<Nexus> nexuses;
 	private List<VillagerShop> shops;
 	private int currentTick;
@@ -58,11 +56,10 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> {
 		this.plugin = plugin;
 		this.arenaValues = arenaValues;
 		nexuses = new ArrayList<Nexus>();
-		powerups = new ArrayList<CirclePowerup>();
+		powerups = new ArrayList<SpherePowerup>();
 		shops = new ArrayList<VillagerShop>();
 		shotManager = new ShotManager(this);
 		missilesManager = new MissilesManager(this);
-		circleEuclideanHelper = new CircleEuclideanHelper(arenaValues.getPowerupsCircleRadius(), arenaValues.getPowerupsCircleParticles());
 		ticksToStart = 30;
 	}
 	
@@ -115,10 +112,11 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> {
 	}
 	
 	private void checkPowerups(SpacePlayer player) {
-		for (CirclePowerup powerup : powerups) {
+		Location pos = player.getPlayer().getEyeLocation();
+		for (SpherePowerup powerup : powerups) {
 			if (powerup.canBePicked()) {
-				CachedCircleEuclidean circle = powerup.getCircle();
-				if (circle.intersects(AabbHelper.getFor(player.getPlayer()))) {
+				CachedSphere sphere = powerup.getSphere();
+				if (pos.distance(sphere.getCenter()) <= sphere.getRadius()) {
 					if (powerup.isReady()) {
 						Bukkit.broadcastMessage("Positive");
 					}
@@ -144,8 +142,8 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> {
 		return new SpacePlayer(this, player, plugin.getUser(player));
 	}
 
-	public void addPowerupCircle(Location location, double rotation) {
-		powerups.add(new CirclePowerup(circleEuclideanHelper.getParticlesLocations(location, rotation), arenaValues.getPowerupRechargeTicks()));
+	public void addPowerup(Location location) {
+		powerups.add(new SpherePowerup(SphereHelper.getSphere(location, arenaValues.getPowerupsSphereRadius(), arenaValues.getPowerupsSphereParticlesDistance(), false), arenaValues.getPowerupRechargeTicks()));
 	}
 
 	@Override
@@ -213,7 +211,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> {
 		super.closeArena();
 	}
 
-	public List<CirclePowerup> getPowerupsCircles() {
+	public List<SpherePowerup> getPowerups() {
 		return powerups;
 	}
 

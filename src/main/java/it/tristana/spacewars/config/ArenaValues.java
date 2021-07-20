@@ -15,8 +15,8 @@ public class ArenaValues implements Configurable {
 	
 	private List<String> teamsNames;
 	
-	private double powerupsCircleRadius;
-	private int powerupsCircleParticles;
+	private double powerupsSphereRadius;
+	private double powerupsSphereParticlesDistance;
 	private int powerupRechargeTicks;
 	
 	private String kitChooseGuiName;
@@ -30,8 +30,8 @@ public class ArenaValues implements Configurable {
 	public void setup() {
 		teamsNames = configTeams.getList(ConfigTeams.TEAMS);
 		
-		powerupsCircleRadius = parseDoubleOrGetDefault(configArena.getString(ConfigArena.POWERUPS_CIRCLE_RADIUS), 3.5);
-		powerupsCircleParticles = parseIntOrGetDefault(configArena.getString(ConfigArena.POWERUPS_CIRCLE_PARTICLES), 64);
+		powerupsSphereRadius = parseDoubleOrGetDefault(configArena.getString(ConfigArena.POWERUPS_SPHERE_RADIUS), 2);
+		powerupsSphereParticlesDistance = parseDoubleOrGetDefault(configArena.getString(ConfigArena.POWERUPS_SPHERE_PARTICLES_DISTANCE), 0.15);
 		powerupRechargeTicks = parseIntOrGetDefault(configArena.getString(ConfigArena.POWERUP_RECHARGE_TICKS), 8);
 		
 		kitChooseGuiName = configArena.getString(ConfigArena.KIT_CHOOSE_GUI_NAME);
@@ -40,15 +40,15 @@ public class ArenaValues implements Configurable {
 	public List<String> getTeamsNames() {
 		return teamsNames;
 	}
-
-	public double getPowerupsCircleRadius() {
-		return powerupsCircleRadius;
-	}
-
-	public int getPowerupsCircleParticles() {
-		return powerupsCircleParticles;
-	}
 	
+	public double getPowerupsSphereRadius() {
+		return powerupsSphereRadius;
+	}
+
+	public double getPowerupsSphereParticlesDistance() {
+		return powerupsSphereParticlesDistance;
+	}
+
 	public int getPowerupRechargeTicks() {
 		return powerupRechargeTicks;
 	}
