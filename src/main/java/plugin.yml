@@ -1,0 +1,13 @@
+name: SpaceWars
+version: 1.0.0
+main: it.tristana.spacewars.Main
+author: Massimiliano Micol
+description: Space Wars minigame
+api-version: 1.17
+depend: [TristanaCommons]
+commands:
+  sw:
+    description: Main command
+    usage: Please type /sw help
+    permission: spacewars.admin
+    default: op
