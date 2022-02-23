@@ -1,0 +1,11 @@
+name: SpaceWars
+main: it.tristana.spacewars.Main
+api-version: 1.18
+author: Massimiliano Micol
+depend: [TristanaCommons]
+commands:
+  spacewars:
+    description: Main command
+    aliases:
+    - sw
+    usage: /sw help
