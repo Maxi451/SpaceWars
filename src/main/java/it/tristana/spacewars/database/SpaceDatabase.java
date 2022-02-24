@@ -38,7 +38,7 @@ public class SpaceDatabase extends DatabaseManager<SpaceUser> {
 		String uuid = getUuid(user.getPlayer());
 		try {
 			executeUpdate(String.format("DELETE FROM %s WHERE uuid = '%s';", tablePlayers, uuid));
-			executeUpdate(String.format("INSERT INTO %S (uuid, wins, kills, deaths, games) VALUES ('%s', %d, %d, %d, %d);", tablePlayers, uuid, user.getWins(), user.getKills(), user.getDeaths(), user.getGames()));
+			executeUpdate(String.format("INSERT INTO %s (uuid, wins, kills, deaths, games) VALUES ('%s', %d, %d, %d, %d);", tablePlayers, uuid, user.getWins(), user.getKills(), user.getDeaths(), user.getGames()));
 		} catch (SQLException e) {
 			plugin.writeThrowableOnErrorsFile(e);
 		}
