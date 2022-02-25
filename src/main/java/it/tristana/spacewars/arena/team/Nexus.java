@@ -2,17 +2,21 @@ package it.tristana.spacewars.arena.team;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 
 import it.tristana.commons.helper.CommonsHelper;
+import it.tristana.commons.interfaces.Tickable;
+import it.tristana.spacewars.helper.ParticlesHelper;
 
-public class Nexus {
+public class Nexus implements Tickable {
 
 	public static final Material NEXUS_MATERIAL = Material.BEACON;
 	public static final Material PILLAR_MATERIAL = Material.OBSIDIAN;
 
 	private static final int DISTANCE_PILLAR_NEXUS = 2;
-	private static final int DISTANCE_Y_PILLAR_NEXUS = 1;
+	private static final int DISTANCE_Y_PILLAR_NEXUS = -1;
 	
+	private SpaceTeam team;
 	private Location location;
 	private Pillar[] pillars;
 	private boolean isBroken;
@@ -25,6 +29,18 @@ public class Nexus {
 				buildPillar(0, DISTANCE_PILLAR_NEXUS),
 				buildPillar(0, -DISTANCE_PILLAR_NEXUS)
 		};
+	}
+
+	@Override
+	public void runTick() {
+		if (isBroken) {
+			return;
+		}
+		for (int i = 0; i < pillars.length; i ++) {
+			if (pillars[i].isEnabled()) {
+				ParticlesHelper.particlesLine(location, pillars[i].getLocation(), 0.1, Particle.FLAME);
+			}
+		}
 	}
 	
 	public void build() {
@@ -65,7 +81,15 @@ public class Nexus {
 		return isBroken;
 	}
 	
+	public SpaceTeam getTeam() {
+		return team;
+	}
+	
+	void setTeam(SpaceTeam team) {
+		this.team = team;
+	}
+	
 	private Pillar buildPillar(int x, int z) {
-		return new Pillar(location.clone().add(x, -DISTANCE_Y_PILLAR_NEXUS, z));
+		return new Pillar(location.clone().add(x, DISTANCE_Y_PILLAR_NEXUS, z));
 	}
 }

@@ -20,25 +20,33 @@ import it.tristana.commons.interfaces.gui.ClickedGuiManager;
 import it.tristana.commons.listener.ChatListener;
 import it.tristana.commons.listener.GuiListener;
 import it.tristana.commons.listener.LoginQuitListener;
+import it.tristana.spacewars.arena.player.kit.ManagerKits;
 import it.tristana.spacewars.chat.SpaceChatManager;
 import it.tristana.spacewars.command.SpaceCommand;
+import it.tristana.spacewars.config.ConfigKits;
 import it.tristana.spacewars.config.ConfigSpaceDatabase;
+import it.tristana.spacewars.config.SettingsKits;
 import it.tristana.spacewars.database.SpaceDatabase;
 import it.tristana.spacewars.database.SpaceUser;
 import it.tristana.spacewars.gui.SpaceClickedGuiManager;
 
 public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 	
+	public static final String ADMIN_PERMS = "spacewars.admin";
+	
 	private static final String COMMAND = "spacewars";
 	
 	private File folder;
 	private boolean isDisabled;
 
+	private SettingsDefaultCommands settingsDefaultCommands;
+	private SettingsKits settingsKits;
+
 	private DatabaseManager<SpaceUser> database;
 	private UsersManager<SpaceUser> usersManager;
-	private SettingsDefaultCommands settingsDefaultCommands;
 	private ChatManager chatManager;
 	private ClickedGuiManager clickedGuiManager;
+	private ManagerKits kitsManager;
 	
 	@Override
 	public void onEnable() {
@@ -46,15 +54,19 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 			database = getDatabase();
 			database.openConnection();
 		} catch (Exception e) {
-			CommonsHelper.consoleInfo("&cCould not open the database connection. Check the errors file");
-			writeThrowableOnErrorsFile(e);
-			isDisabled = true;
+			selfDestroy(e, "&cCould not open the database connection. Check the errors file");
 			return;
 		}
 		folder = getFolder();
-		loadManagers();
-		registerListeners();
 		settingsDefaultCommands = new SettingsDefaultCommands(new ConfigDefaultCommands());
+		settingsKits = new SettingsKits(new ConfigKits(folder));
+		try {
+			loadManagers();
+		} catch (NoSuchMethodException e) {
+			selfDestroy(e, "&cAn internal error occurred loading SpaceWars. This is a programming error! Please report the stacktrace found in your errors file");
+			return;
+		}
+		registerListeners();
 		Bukkit.getPluginCommand(COMMAND).setExecutor(new SpaceCommand(this, settingsDefaultCommands, "sw"));
 	}
 	
@@ -64,11 +76,11 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 			return;
 		}
 		try {
+			usersManager.saveOnlineUsers();
 			database.closeConnection();
 		} catch (SQLException e) {
 			writeThrowableOnErrorsFile(e);
 		}
-		
 	}
 	
 	@Override
@@ -79,13 +91,22 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 	@Override
 	public void reload() {
 		settingsDefaultCommands.setConfig(new ConfigDefaultCommands());
-		settingsDefaultCommands.reload();
+		settingsKits.setConfig(new ConfigKits(folder));
 	}
 	
-	private void loadManagers() {
+	private void selfDestroy(Throwable t, String message) {
+		CommonsHelper.consoleInfo(message);
+		writeThrowableOnErrorsFile(t);
+		isDisabled = true;
+		Bukkit.getPluginManager().disablePlugin(this);
+	}
+	
+	private void loadManagers() throws NoSuchMethodException {
 		usersManager = new BasicUsersManager<>(database);
 		chatManager = new SpaceChatManager();
 		clickedGuiManager = new SpaceClickedGuiManager();
+		kitsManager = new ManagerKits(this, settingsKits);
+		kitsManager.loadDefaultKits();
 	}
 	
 	private void registerListeners() {

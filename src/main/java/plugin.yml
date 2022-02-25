@@ -2,7 +2,7 @@ name: SpaceWars
 main: it.tristana.spacewars.Main
 api-version: 1.18
 author: Massimiliano Micol
-depend: [TristanaCommons]
+depend: [TristanaCommons, NBTAPI]
 commands:
   spacewars:
     description: Main command
