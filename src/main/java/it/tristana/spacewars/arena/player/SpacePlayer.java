@@ -32,6 +32,7 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		} else if (-- ticksForFuel == 0) {
 			giveFuel();
 		}
+		user.getPlayer().setExp((float) ticksForFuel / TICKS_FOR_FUEL);
 	}
 	
 	public SpaceUser getUser() {
@@ -59,7 +60,8 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	}
 	
 	private void giveFuel() {
-		
+		user.getPlayer().getInventory().addItem(new ItemStack(Material.FIREWORK_ROCKET));
+		onRefuel();
 	}
 	
 	private void onRefuel() {

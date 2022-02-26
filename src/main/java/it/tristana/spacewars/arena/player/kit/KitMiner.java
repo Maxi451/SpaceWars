@@ -1,5 +1,8 @@
 package it.tristana.spacewars.arena.player.kit;
 
+import java.util.List;
+
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 
@@ -11,6 +14,21 @@ public class KitMiner extends Kit {
 
 	public KitMiner(SettingsKits settings) {
 		super(settings);
+	}
+
+	@Override
+	public ItemStack getRawDisplayItem() {
+		return new ItemStack(Material.DIAMOND_PICKAXE);
+	}
+
+	@Override
+	public String getName() {
+		return "Kit miner";
+	}
+
+	@Override
+	public List<String> getLore() {
+		return null;
 	}
 
 	@Override

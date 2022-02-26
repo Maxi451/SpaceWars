@@ -16,6 +16,7 @@ import it.tristana.commons.interfaces.arena.Status;
 import it.tristana.commons.interfaces.arena.player.PartiesManager;
 import it.tristana.commons.interfaces.database.UsersManager;
 import it.tristana.spacewars.arena.player.SpacePlayer;
+import it.tristana.spacewars.arena.player.kit.ManagerKits;
 import it.tristana.spacewars.arena.team.ColorsHelper;
 import it.tristana.spacewars.arena.team.Nexus;
 import it.tristana.spacewars.arena.team.SpaceTeam;
@@ -25,10 +26,12 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> {
 
 	private UsersManager<SpaceUser> usersManager;
 	private List<Location> nexusLocations;
+	private ManagerKits kitsManager;
 
-	public SpaceArena(World world, String name, PartiesManager partiesManager, UsersManager<SpaceUser> usersManager) {
+	public SpaceArena(World world, String name, PartiesManager partiesManager, UsersManager<SpaceUser> usersManager, ManagerKits kitsManager) {
 		super(world, name, partiesManager);
 		this.usersManager = usersManager;
+		this.kitsManager = kitsManager;
 		nexusLocations = new ArrayList<Location>();
 	}
 
@@ -82,7 +85,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> {
 	private void selectRandomKitsIfNeeded() {
 		players.forEach(player -> {
 			if (player.getKit() == null) {
-				player.setKit(null); // TODO
+				player.setKit(kitsManager.getRandomKit());
 			}
 		});
 	}
