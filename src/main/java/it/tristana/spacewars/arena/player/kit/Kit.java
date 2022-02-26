@@ -1,5 +1,7 @@
 package it.tristana.spacewars.arena.player.kit;
 
+import java.util.List;
+
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -40,6 +42,12 @@ public abstract class Kit {
 		canBreak.add("beacon");
 		return nbt.getItem();
 	}
+	
+	public abstract ItemStack getRawDisplayItem();
+	
+	public abstract String getName();
+	
+	public abstract List<String> getLore();
 	
 	protected abstract Gun forgeGun();
 }

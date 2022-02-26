@@ -14,6 +14,7 @@ public class ConfigSpaceDatabase extends ConfigDatabase {
 	
 	@Override
 	protected void createDefault() {
+		super.createDefault();
 		set(TABLE_PLAYERS, "sw_players");
 	}
 }

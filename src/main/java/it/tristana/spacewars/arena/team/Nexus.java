@@ -69,6 +69,7 @@ public class Nexus implements Tickable {
 				return false;
 			}
 		}
+		location.getWorld().strikeLightningEffect(location);
 		isBroken = true;
 		return true;
 	}
