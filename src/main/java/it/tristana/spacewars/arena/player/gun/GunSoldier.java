@@ -23,7 +23,7 @@ public class GunSoldier extends Gun {
 
 	@Override
 	protected double getBaseDamage() {
-		return 2;
+		return 5;
 	}
 
 	@Override

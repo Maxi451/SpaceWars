@@ -8,5 +8,6 @@ public class SpaceCommand extends MainCommand<Main> {
 
 	public SpaceCommand(Main plugin, SettingsDefaultCommands settings, String command) {
 		super(plugin, settings, command);
+		registerSubCommand(new CommandElytraLocation(this, "elytra", getAdminPerms()));
 	}
 }

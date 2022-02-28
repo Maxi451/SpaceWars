@@ -3,13 +3,13 @@ package it.tristana.spacewars.gui;
 import it.tristana.commons.gui.BasicGui;
 import it.tristana.commons.interfaces.gui.Element;
 import it.tristana.spacewars.arena.player.kit.Kit;
-import it.tristana.spacewars.arena.player.kit.ManagerKits;
+import it.tristana.spacewars.arena.player.kit.KitsManager;
 
 public class GuiKit extends BasicGui {
 
-	private ManagerKits kitsManager;
+	private KitsManager kitsManager;
 	
-	public GuiKit(String name, ManagerKits kitsManager) {
+	public GuiKit(String name, KitsManager kitsManager) {
 		super(name);
 		this.kitsManager = kitsManager;
 	}

@@ -4,9 +4,10 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.inventory.ItemStack;
 
+import it.tristana.commons.interfaces.Reloadable;
 import it.tristana.spacewars.config.SettingsKits;
 
-public abstract class Gun {
+public abstract class Gun implements Reloadable {
 
 	protected SettingsKits settings;
 	private ItemStack item;
@@ -20,6 +21,10 @@ public abstract class Gun {
 	
 	public Gun(SettingsKits settings) {
 		this.settings = settings;
+	}
+	
+	@Override
+	public final void reload() {
 		reloadTime = getBaseReloadTime();
 		damage = getBaseDamage();
 		resetFmjAndLongBarrel();
@@ -29,7 +34,7 @@ public abstract class Gun {
 		if (item == null) {
 			item = forgeItem();
 		}
-		return item;
+		return item.clone();
 	}
 	
 	public final boolean tryToShoot() {
@@ -68,6 +73,10 @@ public abstract class Gun {
 	
 	public final void onLongBarrel() {
 		isLongBarrel = true;
+	}
+	
+	public final boolean isThisItem(ItemStack other) {
+		return getItem().isSimilar(other);
 	}
 	
 	protected static ItemStack getDefaultItem() {

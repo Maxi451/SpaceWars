@@ -1,8 +1,8 @@
 package it.tristana.spacewars.arena.player.kit;
 
+import java.util.Arrays;
 import java.util.List;
 
-import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 
@@ -18,7 +18,7 @@ public class KitMiner extends Kit {
 
 	@Override
 	public ItemStack getRawDisplayItem() {
-		return new ItemStack(Material.DIAMOND_PICKAXE);
+		return new ItemStack(PICKAXE_MATERIAL);
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public class KitMiner extends Kit {
 
 	@Override
 	public List<String> getLore() {
-		return null;
+		return Arrays.asList("This kit", "is diggy");
 	}
 
 	@Override
@@ -37,9 +37,14 @@ public class KitMiner extends Kit {
 	}
 	
 	@Override
-	protected ItemStack getPickaxe() {
-		ItemStack pickaxe = super.getPickaxe();
+	protected ItemStack getRawPickaxe() {
+		ItemStack pickaxe = super.getRawPickaxe();
 		pickaxe.addUnsafeEnchantment(Enchantment.DIG_SPEED, 3);
 		return pickaxe;
+	}
+
+	@Override
+	public double getBaseArmor() {
+		return 33;
 	}
 }
