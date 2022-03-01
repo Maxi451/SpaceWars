@@ -9,40 +9,58 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.PlayerInventory;
 
 import it.tristana.commons.arena.BasicEnclosedArena;
+import it.tristana.commons.arena.powerup.BasicPowerupsManager;
+import it.tristana.commons.interfaces.Reloadable;
 import it.tristana.commons.interfaces.arena.Status;
 import it.tristana.commons.interfaces.arena.player.PartiesManager;
 import it.tristana.commons.interfaces.database.UsersManager;
 import it.tristana.commons.interfaces.gui.ClickedGuiManager;
+import it.tristana.commons.interfaces.util.Powerup;
+import it.tristana.commons.interfaces.util.PowerupsManager;
 import it.tristana.commons.math.AABB;
 import it.tristana.commons.math.RayTrace;
 import it.tristana.spacewars.arena.player.SpacePlayer;
 import it.tristana.spacewars.arena.player.gun.Gun;
 import it.tristana.spacewars.arena.player.kit.KitsManager;
+import it.tristana.spacewars.arena.powerup.PowerupsBuilder;
 import it.tristana.spacewars.arena.team.ColorsHelper;
 import it.tristana.spacewars.arena.team.Nexus;
 import it.tristana.spacewars.arena.team.SpaceTeam;
+import it.tristana.spacewars.config.SettingsPowerups;
 import it.tristana.spacewars.database.SpaceUser;
 import it.tristana.spacewars.gui.GuiKit;
 import it.tristana.spacewars.helper.ParticlesHelper;
 
-public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> {
+public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> implements Reloadable {
 
 	private UsersManager<SpaceUser> usersManager;
 	private List<Location> nexusLocations;
 	private ClickedGuiManager guiManager;
+	private PowerupsManager<SpacePlayer> powerupsManager;
 	private KitsManager kitsManager;
+	
+	private SettingsPowerups settingsPowerups;
+	
+	private int currentTick;
 
-	public SpaceArena(World world, String name, PartiesManager partiesManager, UsersManager<SpaceUser> usersManager, ClickedGuiManager guiManager, KitsManager kitsManager) {
+	public SpaceArena(World world, String name, PartiesManager partiesManager, UsersManager<SpaceUser> usersManager, ClickedGuiManager guiManager, KitsManager kitsManager, 
+			SettingsPowerups settingsPowerups) {
 		super(world, name, partiesManager);
 		this.usersManager = usersManager;
 		this.kitsManager = kitsManager;
 		this.guiManager = guiManager;
-		nexusLocations = new ArrayList<Location>();
+		this.settingsPowerups = settingsPowerups;
+		reset();
+	}
+
+	@Override
+	public void reload() {
+		closeArena();
 	}
 
 	@Override
@@ -65,6 +83,13 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> {
 			openGuiMenu(player);
 		}
 		return onJoin;
+	}
+	
+	@Override
+	protected void playingPhase() {
+		currentTick ++;
+		teams.forEach(team -> team.runTick());
+		players.forEach(player -> player.runTick());
 	}
 
 	@Override
@@ -162,8 +187,27 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> {
 		spacePlayer.onDeath();
 	}
 	
+	public int getCurrentTick() {
+		return currentTick;
+	}
+	
+	public Powerup<SpacePlayer> getRandomPowerup() {
+		return powerupsManager.getRandomPowerup();
+	}
+	
 	public static void heal(Player player) {
 		player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+	}
+	
+	public static void addHealth(Player player, double health) {
+		AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+		attribute.setBaseValue(attribute.getBaseValue() + health);
+	}
+	
+	private void reset() {
+		baseReset();
+		nexusLocations = new ArrayList<Location>();
+		powerupsManager = new BasicPowerupsManager<>(new PowerupsBuilder(settingsPowerups).createPowerups());
 	}
 	
 	private void selectRandomKitsIfNeeded() {
@@ -179,8 +223,6 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> {
 	}
 	
 	private void giveStartingItems() {
-		teams.forEach(team -> team.getPlayers().forEach(spacePlayer -> {
-			spacePlayer.giveDefaultItems();
-		}));
+		players.forEach(spacePlayer -> spacePlayer.giveDefaultItems());
 	}
 }

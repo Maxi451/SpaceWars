@@ -24,6 +24,7 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	
 	private SpacePlayer lastAttacker;
 	
+	private double money;
 	private int ticksForFuel;
 	private int ticksToRespawn;
 	private int lives;
@@ -36,6 +37,7 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 
 	@Override
 	public void runTick() {
+		giveTickMoney();
 		if (-- ticksToRespawn > 0) {
 			return;
 		} else if (ticksToRespawn == 0) {
@@ -49,7 +51,7 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		lives --;
 		SpaceArena.heal(player);
 		kit.getGun().resetFmjAndLongBarrel();
-		if (lives > 0) {
+		if (lives > 0 && !team.getNexus().isBroken()) {
 			ticksToRespawn = TICKS_FOR_RESPAWN + 1;
 			player.setGameMode(GameMode.SPECTATOR);
 			player.getInventory().clear();
@@ -96,6 +98,11 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	
 	public void upgradePickaxe() {
 		kit.upgradePickaxe();
+	}
+	
+	private void giveTickMoney() {
+		money += Math.pow(arena.getCurrentTick(), 0.25);
+		player.setLevel((int) money);
 	}
 	
 	private void respawn() {
