@@ -7,13 +7,13 @@ import java.util.List;
 import it.tristana.spacewars.Main;
 import it.tristana.spacewars.config.SettingsKits;
 
-public class ManagerKits {
+public class KitsManager {
 
 	private Main plugin;
 	private SettingsKits settings;
 	private List<EntryKit<? extends Kit>> kits;
 	
-	public ManagerKits(Main plugin, SettingsKits settings) {
+	public KitsManager(Main plugin, SettingsKits settings) {
 		this.plugin = plugin;
 		this.settings = settings;
 		kits = new ArrayList<>();

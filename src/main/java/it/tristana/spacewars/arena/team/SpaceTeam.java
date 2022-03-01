@@ -51,6 +51,10 @@ public class SpaceTeam extends BasicTeam<SpacePlayer, SpaceArena> implements Tic
 		return text;
 	}
 	
+	public Color getArmorColor() {
+		return armorColor;
+	}
+	
 	private ItemStack createArmor(Material material) {
 		ItemStack item = new ItemStack(material);
 		ItemMeta meta = item.getItemMeta();

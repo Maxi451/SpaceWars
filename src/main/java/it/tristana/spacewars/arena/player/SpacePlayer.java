@@ -1,8 +1,10 @@
 package it.tristana.spacewars.arena.player;
 
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import it.tristana.commons.arena.player.BasicArenaPlayer;
 import it.tristana.commons.interfaces.Tickable;
@@ -14,25 +16,58 @@ import it.tristana.spacewars.database.SpaceUser;
 public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> implements Tickable {
 
 	private static final int TICKS_FOR_FUEL = 8;
+	private static final int TICKS_FOR_RESPAWN = 5;
+	private static final int STARTING_LIVES = 5;
 	
 	private SpaceUser user;
 	private Kit kit;
 	
+	private SpacePlayer lastAttacker;
+	
 	private int ticksForFuel;
+	private int ticksToRespawn;
+	private int lives;
 	
 	public SpacePlayer(SpaceArena arena, SpaceUser user) {
 		super(arena, user.getPlayer());
 		this.user = user;
+		lives = STARTING_LIVES;
 	}
 
 	@Override
 	public void runTick() {
-		if (hasFuel()) {
-			onRefuel();
-		} else if (-- ticksForFuel == 0) {
-			giveFuel();
+		if (-- ticksToRespawn > 0) {
+			return;
+		} else if (ticksToRespawn == 0) {
+			respawn();
+			return;
 		}
-		user.getPlayer().setExp((float) ticksForFuel / TICKS_FOR_FUEL);
+		checkFuel();
+	}
+	
+	public void onDeath() {
+		lives --;
+		SpaceArena.heal(player);
+		kit.getGun().resetFmjAndLongBarrel();
+		if (lives > 0) {
+			ticksToRespawn = TICKS_FOR_RESPAWN + 1;
+			player.setGameMode(GameMode.SPECTATOR);
+			player.getInventory().clear();
+		}
+	}
+	
+	public void giveDefaultItems() {
+		PlayerInventory inventory = player.getInventory();
+		inventory.setArmorContents(team.getArmor());
+		kit.giveItems(inventory);
+	}
+	
+	public int getLives() {
+		return lives;
+	}
+	
+	public void onLife() {
+		lives ++;
 	}
 	
 	public SpaceUser getUser() {
@@ -47,8 +82,38 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		return kit;
 	}
 	
+	public void setLastAttacker(SpacePlayer lastAttacker) {
+		this.lastAttacker = lastAttacker;
+	}
+	
+	public SpacePlayer getLastAttacker() {
+		return lastAttacker;
+	}
+	
+	public void setPlayingGameMode() {
+		player.setGameMode(GameMode.ADVENTURE);
+	}
+	
+	public void upgradePickaxe() {
+		kit.upgradePickaxe();
+	}
+	
+	private void respawn() {
+		setPlayingGameMode();
+		giveDefaultItems();
+	}
+	
+	private void checkFuel() {
+		if (hasFuel()) {
+			onRefuel();
+		} else if (-- ticksForFuel == 0) {
+			giveFuel();
+		}
+		user.getPlayer().setExp((float) ticksForFuel / TICKS_FOR_FUEL);
+	}
+	
 	private boolean hasFuel() {
-		Inventory inventory = user.getPlayer().getInventory();
+		Inventory inventory = player.getInventory();
 		int size = inventory.getSize();
 		for (int i = 0; i < size; i ++) {
 			ItemStack item = inventory.getItem(i);
@@ -60,7 +125,7 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	}
 	
 	private void giveFuel() {
-		user.getPlayer().getInventory().addItem(new ItemStack(Material.FIREWORK_ROCKET));
+		player.getInventory().addItem(new ItemStack(Material.FIREWORK_ROCKET));
 		onRefuel();
 	}
 	

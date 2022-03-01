@@ -25,7 +25,7 @@ import it.tristana.commons.listener.GuiListener;
 import it.tristana.commons.listener.LoginQuitListener;
 import it.tristana.spacewars.arena.SpaceArena;
 import it.tristana.spacewars.arena.SpaceArenaLoader;
-import it.tristana.spacewars.arena.player.kit.ManagerKits;
+import it.tristana.spacewars.arena.player.kit.KitsManager;
 import it.tristana.spacewars.chat.SpaceChatManager;
 import it.tristana.spacewars.command.SpaceCommand;
 import it.tristana.spacewars.config.ConfigKits;
@@ -54,7 +54,7 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 	private ClickedGuiManager clickedGuiManager;
 	private ArenasManager<SpaceArena> arenasManager;
 	private ArenaLoader<SpaceArena> arenaLoader;
-	private ManagerKits kitsManager;
+	private KitsManager kitsManager;
 	
 	@Override
 	public void onEnable() {
@@ -137,7 +137,7 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 		usersManager = new BasicUsersManager<>(database);
 		chatManager = new SpaceChatManager();
 		clickedGuiManager = new SpaceClickedGuiManager();
-		kitsManager = new ManagerKits(this, settingsKits);
+		kitsManager = new KitsManager(this, settingsKits);
 		kitsManager.loadDefaultKits();
 		registerGuis();
 	}

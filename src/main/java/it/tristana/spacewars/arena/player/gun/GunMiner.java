@@ -28,7 +28,7 @@ public class GunMiner extends Gun {
 
 	@Override
 	protected double getBaseDamage() {
-		return 1;
+		return 3;
 	}
 
 	@Override
