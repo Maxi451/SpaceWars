@@ -18,22 +18,22 @@ public class GunSoldier extends Gun {
 
 	@Override
 	protected long getBaseReloadTime() {
-		return 1000;
+		return settings.getSoldierGunReload();
 	}
 
 	@Override
 	protected double getBaseDamage() {
-		return 5;
+		return settings.getSoldierGunDamage();
 	}
 
 	@Override
 	protected boolean isBaseFmj() {
-		return false;
+		return settings.isSoldierGunFmj();
 	}
 
 	@Override
 	protected boolean isBaseLongBarrel() {
-		return false;
+		return settings.isSoldierGunLongBarrel();
 	}
 
 	@Override

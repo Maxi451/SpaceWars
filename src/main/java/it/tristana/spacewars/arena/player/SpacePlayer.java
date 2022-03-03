@@ -8,12 +8,13 @@ import org.bukkit.inventory.PlayerInventory;
 
 import it.tristana.commons.arena.player.BasicArenaPlayer;
 import it.tristana.commons.interfaces.Tickable;
+import it.tristana.spacewars.arena.Shootable;
 import it.tristana.spacewars.arena.SpaceArena;
 import it.tristana.spacewars.arena.player.kit.Kit;
 import it.tristana.spacewars.arena.team.SpaceTeam;
 import it.tristana.spacewars.database.SpaceUser;
 
-public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> implements Tickable {
+public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> implements Tickable, Shootable {
 
 	private static final int TICKS_FOR_FUEL = 8;
 	private static final int TICKS_FOR_RESPAWN = 5;

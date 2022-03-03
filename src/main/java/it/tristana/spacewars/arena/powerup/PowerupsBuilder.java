@@ -14,8 +14,8 @@ public class PowerupsBuilder {
 	
 	public Powerup<SpacePlayer>[] createPowerups() {
 		return new SpacePowerup[] {
-			new Powerup1Up(settings.get_1upName(), settings.get_1upChance()),
-			new PowerupLongBarrel(settings.getLongBarrelName(), settings.getLongBarrelChance())
+			new Powerup1Up(settings),
+			new PowerupLongBarrel(settings)
 		};
 	}
 }

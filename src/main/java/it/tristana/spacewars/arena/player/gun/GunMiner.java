@@ -23,21 +23,21 @@ public class GunMiner extends Gun {
 
 	@Override
 	protected long getBaseReloadTime() {
-		return 2000;
+		return settings.getMinerGunReload();
 	}
 
 	@Override
 	protected double getBaseDamage() {
-		return 3;
+		return settings.getMinerGunDamage();
 	}
 
 	@Override
 	protected boolean isBaseFmj() {
-		return false;
+		return settings.isMinerGunFmj();
 	}
 
 	@Override
 	protected boolean isBaseLongBarrel() {
-		return false;
+		return settings.isMinerGunLongBarrel();
 	}
 }

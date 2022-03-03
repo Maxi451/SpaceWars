@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.function.Function;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -31,8 +32,10 @@ import it.tristana.spacewars.arena.powerup.PowerupsBuilder;
 import it.tristana.spacewars.arena.team.ColorsHelper;
 import it.tristana.spacewars.arena.team.Nexus;
 import it.tristana.spacewars.arena.team.SpaceTeam;
+import it.tristana.spacewars.config.SettingsMessages;
 import it.tristana.spacewars.config.SettingsPowerups;
 import it.tristana.spacewars.database.SpaceUser;
+import it.tristana.spacewars.event.SpacePlayerShotEvent;
 import it.tristana.spacewars.gui.GuiKit;
 import it.tristana.spacewars.helper.ParticlesHelper;
 
@@ -43,19 +46,21 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	private ClickedGuiManager guiManager;
 	private PowerupsManager<SpacePlayer> powerupsManager;
 	private KitsManager kitsManager;
-	
+
 	private SettingsPowerups settingsPowerups;
-	
+	private SettingsMessages settingsMessages;
+
 	private int currentTick;
 
 	public SpaceArena(World world, String name, PartiesManager partiesManager, UsersManager<SpaceUser> usersManager, ClickedGuiManager guiManager, KitsManager kitsManager, 
-			SettingsPowerups settingsPowerups) {
+			SettingsPowerups settingsPowerups, SettingsMessages settingsMessages) {
 		super(world, name, partiesManager);
 		this.usersManager = usersManager;
 		this.kitsManager = kitsManager;
 		this.guiManager = guiManager;
 		this.settingsPowerups = settingsPowerups;
-		reset();
+		this.settingsMessages = settingsMessages;
+		reset(false);
 	}
 
 	@Override
@@ -75,7 +80,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	public void setStatus(Status status) {
 		super.setStatus(status);
 	}
-	
+
 	@Override
 	public boolean onPlayerJoin(Player player) {
 		boolean onJoin = super.onPlayerJoin(player);
@@ -84,7 +89,15 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		}
 		return onJoin;
 	}
-	
+
+	@Override
+	public void closeArena() {
+		players.forEach(player -> {
+			exit(player);
+		});
+		reset();
+	}
+
 	@Override
 	protected void playingPhase() {
 		currentTick ++;
@@ -106,6 +119,17 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	protected int getTeamsForNumPlayers(int players) {
 		return Math.min(ColorsHelper.MAX_SUPPORTED_TEAMS, Math.min(spawnpoints.size(), nexusLocations.size()));
 	}
+
+	public void exit(Player player) {
+		SpacePlayer spacePlayer = getArenaPlayer(player);
+		if (spacePlayer != null) {
+			exit(spacePlayer);
+		}
+	}
+	
+	public void exit(SpacePlayer player) {
+		
+	}
 	
 	public void openGuiMenu(Player player) {
 		GuiKit gui = guiManager.getGui(GuiKit.class);
@@ -113,7 +137,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 			gui.open(player);
 		}
 	}
-	
+
 	public boolean onBlockBroken(Player player, Block block) {
 		Material type = block.getType();
 		boolean isNexus = type == Nexus.NEXUS_MATERIAL;
@@ -133,7 +157,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		}
 		return false;
 	}
-	
+
 	public void onShot(SpacePlayer shooter) {
 		Gun gun = shooter.getKit().getGun();
 		double maxDistance = gun.isLongBarrel() ? 75 : 50;
@@ -151,15 +175,16 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		double minDistance = Double.MAX_VALUE;
 		SpacePlayer targetFound = null;
 		for (SpacePlayer target : players) {
-			if (team != target.getTeam()) {
-				Player targetPlayer = target.getPlayer();
-				boolean isGliding = targetPlayer.isGliding();
-				if (RayTrace.canHit(player, targetPlayer, maxDistance, isGliding ? 0.25 : 0, isGliding)) {
-					double distance = playerPos.distance(targetPlayer.getEyeLocation());
-					if (distance < minDistance) {
-						targetFound = target;
-						minDistance = distance;
-					}
+			if (team == target.getTeam()) {
+				continue;
+			}
+			Player targetPlayer = target.getPlayer();
+			boolean isGliding = targetPlayer.isGliding();
+			if (RayTrace.canHit(player, targetPlayer, maxDistance, isGliding ? 0.25 : 0, isGliding)) {
+				double distance = playerPos.distance(targetPlayer.getEyeLocation());
+				if (distance < minDistance) {
+					targetFound = target;
+					minDistance = distance;
 				}
 			}
 		}
@@ -168,6 +193,11 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 			onDamage(targetFound, shooter, gun.getDamage());
 			maxDistanceLocation = targetPlayer.isGliding() ? AABB.getElytraPlayerEyesPos(targetPlayer) : targetPlayer.getEyeLocation();
 		}
+		SpacePlayerShotEvent event = new SpacePlayerShotEvent(shooter, targetFound);
+		Bukkit.getPluginManager().callEvent(event);
+		if (event.isCancelled()) {
+			return;
+		}
 		ParticlesHelper.particlesLineColored(playerPos, maxDistanceLocation, 0.1, shooter.getTeam().getArmorColor(), 1);
 		world.playSound(player, gun.getSound(), 1, 32);
 	}
@@ -175,41 +205,47 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	public void onDamage(SpacePlayer player, SpacePlayer damager, double damage) {
 		onTrueDamage(player, damager, 100d / Math.max(1, 100 + player.getKit().getArmor()) * damage);
 	}
-	
+
 	public void onTrueDamage(SpacePlayer player, SpacePlayer damager, double damage) {
 		if (damager != null) {
 			player.setLastAttacker(damager);
 		}
 		player.getPlayer().damage(damage);
 	}
-	
+
 	public void onPlayerDeath(SpacePlayer spacePlayer) {
 		spacePlayer.onDeath();
 	}
-	
+
 	public int getCurrentTick() {
 		return currentTick;
 	}
-	
+
 	public Powerup<SpacePlayer> getRandomPowerup() {
 		return powerupsManager.getRandomPowerup();
 	}
-	
+
 	public static void heal(Player player) {
 		player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 	}
-	
+
 	public static void addHealth(Player player, double health) {
 		AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
 		attribute.setBaseValue(attribute.getBaseValue() + health);
 	}
-	
+
 	private void reset() {
-		baseReset();
+		reset(true);
+	}
+
+	private void reset(boolean baseReset) {
+		if (baseReset) {
+			baseReset();
+		}
 		nexusLocations = new ArrayList<Location>();
 		powerupsManager = new BasicPowerupsManager<>(new PowerupsBuilder(settingsPowerups).createPowerups());
 	}
-	
+
 	private void selectRandomKitsIfNeeded() {
 		players.forEach(player -> {
 			if (player.getKit() == null) {
@@ -217,11 +253,11 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 			}
 		});
 	}
-	
+
 	private void changeGameModes() {
 		players.forEach(player -> player.setPlayingGameMode());
 	}
-	
+
 	private void giveStartingItems() {
 		players.forEach(spacePlayer -> spacePlayer.giveDefaultItems());
 	}

@@ -1,6 +1,5 @@
 package it.tristana.spacewars.arena.player.kit;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.enchantments.Enchantment;
@@ -23,12 +22,12 @@ public class KitMiner extends Kit {
 
 	@Override
 	public String getName() {
-		return "Kit miner";
+		return settings.getMinerName();
 	}
 
 	@Override
 	public List<String> getLore() {
-		return Arrays.asList("This kit", "is diggy");
+		return settings.getMinerLore();
 	}
 
 	@Override
@@ -45,6 +44,6 @@ public class KitMiner extends Kit {
 
 	@Override
 	public double getBaseArmor() {
-		return 33;
+		return settings.getMinerArmor();
 	}
 }

@@ -9,6 +9,7 @@ import it.tristana.commons.interfaces.arena.ArenasManager;
 import it.tristana.commons.interfaces.arena.Status;
 import it.tristana.spacewars.arena.SpaceArena;
 import it.tristana.spacewars.arena.player.SpacePlayer;
+import it.tristana.spacewars.arena.player.gun.Gun;
 
 public class ShotListener implements Listener {
 
@@ -26,7 +27,8 @@ public class ShotListener implements Listener {
 			return;
 		}
 		SpacePlayer spacePlayer = arena.getArenaPlayer(player);
-		if (spacePlayer.getKit().getGun().isThisItem(player.getInventory().getItemInMainHand())) {
+		Gun gun = spacePlayer.getKit().getGun();
+		if (gun.isThisItem(player.getInventory().getItemInMainHand()) && gun.tryToShoot()) {
 			arena.onShot(spacePlayer);
 		}
 	}

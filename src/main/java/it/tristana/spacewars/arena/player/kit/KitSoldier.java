@@ -1,6 +1,5 @@
 package it.tristana.spacewars.arena.player.kit;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Material;
@@ -23,12 +22,12 @@ public class KitSoldier extends Kit {
 
 	@Override
 	public String getName() {
-		return "Kit soldier";
+		return settings.getSoldierName();
 	}
 
 	@Override
 	public List<String> getLore() {
-		return Arrays.asList("This kit", "has 3 lines", "of lore");
+		return settings.getSoldierLore();
 	}
 
 	@Override
@@ -38,6 +37,6 @@ public class KitSoldier extends Kit {
 
 	@Override
 	public double getBaseArmor() {
-		return 100;
+		return settings.getSoldierArmor();
 	}
 }

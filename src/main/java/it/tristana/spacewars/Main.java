@@ -4,18 +4,21 @@ import java.io.File;
 import java.sql.SQLException;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 
 import it.tristana.commons.arena.BasicArenasManager;
 import it.tristana.commons.config.ConfigDefaultCommands;
 import it.tristana.commons.config.SettingsDefaultCommands;
 import it.tristana.commons.database.BasicUsersManager;
 import it.tristana.commons.database.DatabaseManager;
+import it.tristana.commons.helper.BasicPartiesManager;
 import it.tristana.commons.helper.CommonsHelper;
 import it.tristana.commons.helper.PluginDraft;
 import it.tristana.commons.interfaces.DatabaseHolder;
 import it.tristana.commons.interfaces.Reloadable;
 import it.tristana.commons.interfaces.arena.ArenaLoader;
 import it.tristana.commons.interfaces.arena.ArenasManager;
+import it.tristana.commons.interfaces.arena.player.PartiesManager;
 import it.tristana.commons.interfaces.chat.ChatManager;
 import it.tristana.commons.interfaces.database.Database;
 import it.tristana.commons.interfaces.database.UsersManager;
@@ -28,8 +31,10 @@ import it.tristana.spacewars.arena.SpaceArenaLoader;
 import it.tristana.spacewars.arena.player.kit.KitsManager;
 import it.tristana.spacewars.chat.SpaceChatManager;
 import it.tristana.spacewars.command.SpaceCommand;
+import it.tristana.spacewars.config.ConfigCommands;
 import it.tristana.spacewars.config.ConfigKits;
 import it.tristana.spacewars.config.ConfigSpaceDatabase;
+import it.tristana.spacewars.config.SettingsCommands;
 import it.tristana.spacewars.config.SettingsKits;
 import it.tristana.spacewars.database.SpaceDatabase;
 import it.tristana.spacewars.database.SpaceUser;
@@ -47,6 +52,7 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 
 	private SettingsDefaultCommands settingsDefaultCommands;
 	private SettingsKits settingsKits;
+	private SettingsCommands settingsCommands;
 
 	private DatabaseManager<SpaceUser> database;
 	private UsersManager<SpaceUser> usersManager;
@@ -54,7 +60,10 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 	private ClickedGuiManager clickedGuiManager;
 	private ArenasManager<SpaceArena> arenasManager;
 	private ArenaLoader<SpaceArena> arenaLoader;
+	private PartiesManager partiesManager;
 	private KitsManager kitsManager;
+	
+	private Location mainLobby;
 	
 	@Override
 	public void onEnable() {
@@ -63,11 +72,10 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 			database = getDatabase();
 			database.openConnection();
 		} catch (Exception e) {
-			selfDestroy(e, "&cCould not open the database connection. Check the errors file");
+			selfDestroy(e, "&cCould not open the database connection. Did you configure the credentials? Check the errors file");
 			return;
 		}
-		settingsDefaultCommands = new SettingsDefaultCommands(new ConfigDefaultCommands());
-		settingsKits = new SettingsKits(new ConfigKits(folder));
+		createSettings();
 		loadArenas();
 		try {
 			loadManagers();
@@ -76,7 +84,7 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 			return;
 		}
 		registerListeners();
-		Bukkit.getPluginCommand(COMMAND).setExecutor(new SpaceCommand(this, settingsDefaultCommands, "sw"));
+		Bukkit.getPluginCommand(COMMAND).setExecutor(new SpaceCommand(this, settingsDefaultCommands, "sw", settingsCommands));
 	}
 	
 	@Override
@@ -103,8 +111,21 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 	public void reload() {
 		settingsDefaultCommands.setConfig(new ConfigDefaultCommands());
 		settingsKits.setConfig(new ConfigKits(folder));
+		settingsCommands.setConfig(new ConfigCommands(folder));
 		clickedGuiManager.clearGuis();
 		registerGuis();
+	}
+	
+	public ArenasManager<SpaceArena> getArenasManager() {
+		return arenasManager;
+	}
+	
+	public Location getMainLobby() {
+		return mainLobby.clone();
+	}
+	
+	public void setMainLobby(Location mainLobby) {
+		this.mainLobby = mainLobby;
 	}
 	
 	private void registerGuis() {
@@ -133,10 +154,17 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 		arenasManager.startClock(this, 20);
 	}
 	
+	private void createSettings() {
+		settingsDefaultCommands = new SettingsDefaultCommands(new ConfigDefaultCommands());
+		settingsKits = new SettingsKits(new ConfigKits(folder));
+		settingsCommands = new SettingsCommands(new ConfigCommands(folder));
+	}
+	
 	private void loadManagers() throws NoSuchMethodException {
 		usersManager = new BasicUsersManager<>(database);
 		chatManager = new SpaceChatManager();
 		clickedGuiManager = new SpaceClickedGuiManager();
+		partiesManager = new BasicPartiesManager();
 		kitsManager = new KitsManager(this, settingsKits);
 		kitsManager.loadDefaultKits();
 		registerGuis();
