@@ -171,7 +171,7 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 	}
 	
 	private void registerListeners() {
-		register(new LoginQuitListener<>(usersManager, database));
+		register(new LoginQuitListener<>(usersManager, database, null, null));
 		register(new ChatListener(chatManager));
 		register(new GuiListener(clickedGuiManager));
 	}
