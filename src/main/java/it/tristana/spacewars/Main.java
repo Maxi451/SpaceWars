@@ -8,13 +8,16 @@ import org.bukkit.Location;
 
 import it.tristana.commons.arena.BasicArenasManager;
 import it.tristana.commons.config.ConfigDefaultCommands;
+import it.tristana.commons.config.ConfigTeams;
 import it.tristana.commons.config.SettingsDefaultCommands;
+import it.tristana.commons.config.SettingsTeams;
 import it.tristana.commons.database.BasicUsersManager;
 import it.tristana.commons.database.DatabaseManager;
 import it.tristana.commons.helper.BasicPartiesManager;
 import it.tristana.commons.helper.CommonsHelper;
 import it.tristana.commons.helper.PluginDraft;
 import it.tristana.commons.interfaces.DatabaseHolder;
+import it.tristana.commons.interfaces.PartiesHolder;
 import it.tristana.commons.interfaces.Reloadable;
 import it.tristana.commons.interfaces.arena.ArenaLoader;
 import it.tristana.commons.interfaces.arena.ArenasManager;
@@ -33,15 +36,22 @@ import it.tristana.spacewars.chat.SpaceChatManager;
 import it.tristana.spacewars.command.SpaceCommand;
 import it.tristana.spacewars.config.ConfigCommands;
 import it.tristana.spacewars.config.ConfigKits;
+import it.tristana.spacewars.config.ConfigMessages;
+import it.tristana.spacewars.config.ConfigPowerups;
 import it.tristana.spacewars.config.ConfigSpaceDatabase;
 import it.tristana.spacewars.config.SettingsCommands;
 import it.tristana.spacewars.config.SettingsKits;
+import it.tristana.spacewars.config.SettingsMessages;
+import it.tristana.spacewars.config.SettingsPowerups;
 import it.tristana.spacewars.database.SpaceDatabase;
 import it.tristana.spacewars.database.SpaceUser;
 import it.tristana.spacewars.gui.GuiKit;
 import it.tristana.spacewars.gui.SpaceClickedGuiManager;
+import it.tristana.spacewars.listener.BlockListener;
+import it.tristana.spacewars.listener.PlayerDeathListener;
+import it.tristana.spacewars.listener.ShotListener;
 
-public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
+public class Main extends PluginDraft implements Reloadable, DatabaseHolder, PartiesHolder {
 	
 	public static final String ADMIN_PERMS = "spacewars.admin";
 	
@@ -53,7 +63,10 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 	private SettingsDefaultCommands settingsDefaultCommands;
 	private SettingsKits settingsKits;
 	private SettingsCommands settingsCommands;
-
+	private SettingsPowerups settingsPowerups;
+	private SettingsMessages settingsMessages;
+	private SettingsTeams settingsTeams;
+	
 	private DatabaseManager<SpaceUser> database;
 	private UsersManager<SpaceUser> usersManager;
 	private ChatManager chatManager;
@@ -112,16 +125,52 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 		settingsDefaultCommands.setConfig(new ConfigDefaultCommands());
 		settingsKits.setConfig(new ConfigKits(folder));
 		settingsCommands.setConfig(new ConfigCommands(folder));
+		settingsPowerups.setConfig(new ConfigPowerups(folder));
+		settingsMessages.setConfig(new ConfigMessages(folder));
+		settingsTeams.setConfig(new ConfigTeams(folder));
 		clickedGuiManager.clearGuis();
 		registerGuis();
+	}
+	
+	@Override
+	public PartiesManager getPartiesManager() {
+		return partiesManager;
 	}
 	
 	public ArenasManager<SpaceArena> getArenasManager() {
 		return arenasManager;
 	}
 	
+	public SettingsKits getSettingsKits() {
+		return settingsKits;
+	}
+	
+	public SettingsPowerups getSettingsPowerups() {
+		return settingsPowerups;
+	}
+	
+	public SettingsMessages getSettingsMessages() {
+		return settingsMessages;
+	}
+	
+	public SettingsTeams getSettingsTeams() {
+		return settingsTeams;
+	}
+
+	public UsersManager<SpaceUser> getUsersManager() {
+		return usersManager;
+	}
+
+	public ClickedGuiManager getClickedGuiManager() {
+		return clickedGuiManager;
+	}
+
+	public KitsManager getKitsManager() {
+		return kitsManager;
+	}
+
 	public Location getMainLobby() {
-		return mainLobby.clone();
+		return mainLobby == null ? null : mainLobby.clone();
 	}
 	
 	public void setMainLobby(Location mainLobby) {
@@ -129,7 +178,7 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 	}
 	
 	private void registerGuis() {
-		clickedGuiManager.registerGui(new GuiKit("Kits", kitsManager));
+		clickedGuiManager.registerGui(new GuiKit(CommonsHelper.toChatColors("&6&lKits"), kitsManager));
 	}
 	
 	private void selfDestroy(Throwable t, String message) {
@@ -144,13 +193,19 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 	}
 	
 	private void saveArenas() {
-		arenaLoader.saveArenas(arenasManager.getArenas());
+		if (mainLobby != null) {
+			arenaLoader.saveMainLobby(mainLobby);
+			arenaLoader.saveArenas(arenasManager.getArenas());
+		}
 	}
 	
 	private void loadArenas() {
-		arenaLoader = new SpaceArenaLoader(folder);
+		arenaLoader = new SpaceArenaLoader(folder, this);
+		mainLobby = getMainLobby();
 		arenasManager = new BasicArenasManager<>();
-		arenaLoader.loadArenas().forEach(arena -> arenasManager.addArena(arena));
+		if (mainLobby != null) {
+			arenaLoader.loadArenas().forEach(arena -> arenasManager.addArena(arena));
+		}
 		arenasManager.startClock(this, 20);
 	}
 	
@@ -158,6 +213,9 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 		settingsDefaultCommands = new SettingsDefaultCommands(new ConfigDefaultCommands());
 		settingsKits = new SettingsKits(new ConfigKits(folder));
 		settingsCommands = new SettingsCommands(new ConfigCommands(folder));
+		settingsPowerups = new SettingsPowerups(new ConfigPowerups(folder));
+		settingsMessages = new SettingsMessages(new ConfigMessages(folder));
+		settingsTeams = new SettingsTeams(new ConfigTeams(folder));
 	}
 	
 	private void loadManagers() throws NoSuchMethodException {
@@ -174,6 +232,9 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder {
 		register(new LoginQuitListener<>(usersManager, database, null, null));
 		register(new ChatListener(chatManager));
 		register(new GuiListener(clickedGuiManager));
+		register(new ShotListener(arenasManager));
+		register(new PlayerDeathListener(arenasManager));
+		register(new BlockListener(arenasManager));
 	}
 	
 	private SpaceDatabase getDatabase() {

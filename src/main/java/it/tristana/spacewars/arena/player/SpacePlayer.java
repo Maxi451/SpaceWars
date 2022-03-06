@@ -34,6 +34,7 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		super(arena, user.getPlayer());
 		this.user = user;
 		lives = STARTING_LIVES;
+		ticksForFuel = TICKS_FOR_FUEL;
 	}
 
 	@Override
@@ -50,6 +51,7 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	
 	public void onDeath() {
 		lives --;
+		lastAttacker = null;
 		SpaceArena.heal(player);
 		kit.getGun().resetFmjAndLongBarrel();
 		if (lives > 0 && !team.getNexus().isBroken()) {
@@ -114,7 +116,7 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	private void checkFuel() {
 		if (hasFuel()) {
 			onRefuel();
-		} else if (-- ticksForFuel == 0) {
+		} else if (-- ticksForFuel <= 0) {
 			giveFuel();
 		}
 		user.getPlayer().setExp((float) ticksForFuel / TICKS_FOR_FUEL);

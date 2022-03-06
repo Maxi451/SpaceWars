@@ -6,11 +6,22 @@ import it.tristana.spacewars.config.SettingsPowerups;
 public class Powerup1Up extends SpacePowerup {
 
 	public Powerup1Up(SettingsPowerups settings) {
-		super(settings.get_1upName(), settings.get_1upChance());
+		super(settings);
 	}
 
 	@Override
 	public boolean doAction(SpacePlayer arenaPlayer) {
-		return false;
+		arenaPlayer.onLife();
+		return true;
+	}
+
+	@Override
+	public String getName() {
+		return settings.get_1upName();
+	}
+
+	@Override
+	public int getSpawnChance() {
+		return settings.get_1upChance();
 	}
 }

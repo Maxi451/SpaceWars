@@ -22,7 +22,7 @@ public class CommandMainLobby extends SpaceSubCommand {
 			plugin.setMainLobby(playerPos);
 			CommonsHelper.info(sender, settings.getMainLobbyExecuted());
 		} else {
-			CommonsHelper.info(sender, CommonsHelper.replaceAll(settings.getMainLobbyArenaHere(), "{arena}", arena.getName()));
+			CommonsHelper.info(sender, CommonsHelper.replaceAll(settings.getOtherArenaHere(), "{arena}", arena.getName()));
 		}
 	}
 

@@ -21,6 +21,7 @@ public abstract class Gun implements Reloadable {
 	
 	public Gun(SettingsKits settings) {
 		this.settings = settings;
+		reload();
 	}
 	
 	@Override

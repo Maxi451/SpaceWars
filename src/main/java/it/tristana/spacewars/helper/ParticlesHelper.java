@@ -15,6 +15,18 @@ public class ParticlesHelper {
 	
 	private ParticlesHelper() {}
 
+	public static void particle(Location pos, Color color) {
+		particle(pos, Particle.REDSTONE, new Particle.DustOptions(color, 1));
+	}
+
+	public static void particle(Location pos, Particle particle) {
+		particle(pos, particle, null);
+	}
+
+	private static void particle(Location pos, Particle particle, Particle.DustOptions dust) {
+		pos.getWorld().spawnParticle(particle, pos.getX(), pos.getY(), pos.getZ(), 1, 0, 0, 0, 0, dust, true);
+	}
+	
 	public static void particlesLineColored(Location pos1, Location pos2, double distanceBetweenParticles, Color color) {
 		particlesLineColored(pos1, pos2, distanceBetweenParticles, color, 1);
 	}

@@ -3,11 +3,13 @@ package it.tristana.spacewars.arena;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -16,15 +18,20 @@ import org.bukkit.entity.Player;
 
 import it.tristana.commons.arena.BasicEnclosedArena;
 import it.tristana.commons.arena.powerup.BasicPowerupsManager;
+import it.tristana.commons.config.SettingsTeams;
+import it.tristana.commons.helper.BasicTickablesManager;
+import it.tristana.commons.helper.CommonsHelper;
 import it.tristana.commons.interfaces.Reloadable;
 import it.tristana.commons.interfaces.arena.Status;
-import it.tristana.commons.interfaces.arena.player.PartiesManager;
 import it.tristana.commons.interfaces.database.UsersManager;
 import it.tristana.commons.interfaces.gui.ClickedGuiManager;
 import it.tristana.commons.interfaces.util.Powerup;
 import it.tristana.commons.interfaces.util.PowerupsManager;
+import it.tristana.commons.interfaces.util.TickablesManager;
 import it.tristana.commons.math.AABB;
+import it.tristana.commons.math.Ray;
 import it.tristana.commons.math.RayTrace;
+import it.tristana.spacewars.Main;
 import it.tristana.spacewars.arena.player.SpacePlayer;
 import it.tristana.spacewars.arena.player.gun.Gun;
 import it.tristana.spacewars.arena.player.kit.KitsManager;
@@ -41,26 +48,40 @@ import it.tristana.spacewars.helper.ParticlesHelper;
 
 public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> implements Reloadable {
 
-	private UsersManager<SpaceUser> usersManager;
-	private List<Location> nexusLocations;
-	private ClickedGuiManager guiManager;
-	private PowerupsManager<SpacePlayer> powerupsManager;
-	private KitsManager kitsManager;
+	private static final Set<Material> transparentBlocks = new HashSet<Material>();
+	static {
+		transparentBlocks.add(Material.AIR);
+	}
+	
+	private final Main plugin;
+	private final UsersManager<SpaceUser> usersManager;
+	private final List<Location> nexusLocations;
+	private final List<CirclePowerup> circles;
+	private final ClickedGuiManager guiManager;
+	private final PowerupsManager<SpacePlayer> powerupsManager;
+	private final KitsManager kitsManager;
 
-	private SettingsPowerups settingsPowerups;
-	private SettingsMessages settingsMessages;
+	private final SettingsPowerups settingsPowerups;
+	private final SettingsMessages settingsMessages;
+	private final SettingsTeams settingsTeams;
+	
+	private TickablesManager playersPositionManager;
 
 	private int currentTick;
 
-	public SpaceArena(World world, String name, PartiesManager partiesManager, UsersManager<SpaceUser> usersManager, ClickedGuiManager guiManager, KitsManager kitsManager, 
-			SettingsPowerups settingsPowerups, SettingsMessages settingsMessages) {
-		super(world, name, partiesManager);
-		this.usersManager = usersManager;
-		this.kitsManager = kitsManager;
-		this.guiManager = guiManager;
-		this.settingsPowerups = settingsPowerups;
-		this.settingsMessages = settingsMessages;
-		reset(false);
+	public SpaceArena(World world, String name, Main plugin) {
+		super(world, name, plugin.getPartiesManager());
+		this.plugin = plugin;
+		this.usersManager = plugin.getUsersManager();
+		this.kitsManager = plugin.getKitsManager();
+		this.guiManager = plugin.getClickedGuiManager();
+		this.settingsPowerups = plugin.getSettingsPowerups();
+		this.settingsMessages = plugin.getSettingsMessages();
+		this.settingsTeams = plugin.getSettingsTeams();
+		nexusLocations = new ArrayList<>();
+		circles = new ArrayList<>();
+		powerupsManager = new BasicPowerupsManager<>(new PowerupsBuilder(settingsPowerups).createPowerups());
+		reset();
 	}
 
 	@Override
@@ -72,8 +93,10 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	public void startGame() {
 		super.startGame();
 		selectRandomKitsIfNeeded();
+		clearInventories();
 		giveStartingItems();
 		changeGameModes();
+		buildNexuses();
 	}
 
 	@Override
@@ -99,10 +122,39 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	}
 
 	@Override
+	public boolean setSpawnpoint(Location location) {
+		boolean flag = spawnpoints.size() < Math.min(settingsTeams.getTeams().length, ColorsHelper.MAX_SUPPORTED_TEAMS);
+		if (flag) {
+			flag = super.setSpawnpoint(location);
+		}
+		return flag;
+	}
+
+	@Override
+	public void onPlayerLeave(Player player) {
+		SpacePlayer spacePlayer = getArenaPlayer(player);
+		if (spacePlayer == null) {
+			return;
+		}
+		exit(spacePlayer);
+	}
+
+	@Override
 	protected void playingPhase() {
 		currentTick ++;
+		if (checkWinningConditions()) {
+			setStatus(Status.ENDING);
+			return;
+		}
 		teams.forEach(team -> team.runTick());
 		players.forEach(player -> player.runTick());
+		circles.forEach(circle -> circle.runTick());
+		circles.forEach(circle -> {
+			Ray[] rays = circle.getRays();
+			for (int i = 0; i < rays.length; i ++) {
+				ParticlesHelper.particlesLine(rays[i].getOrigin().clone().toLocation(world), rays[i].getOrigin().clone().add(rays[i].getDirection().multiply(CirclePowerup.RADIUS)).toLocation(world), 0.5, Particle.FLAME);
+			}
+		});
 	}
 
 	@Override
@@ -112,25 +164,30 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 
 	@Override
 	protected SpaceTeam createTeam(int index) {
-		return new SpaceTeam(this, "Team #" + index, null, new Nexus(nexusLocations.get(index)), ColorsHelper.getColor(index));
+		return new SpaceTeam(this, spawnpoints.get(index), getTeamName(index), getColorCode(index), new Nexus(nexusLocations.get(index)), ColorsHelper.getColor(index));
 	}
 
 	@Override
 	protected int getTeamsForNumPlayers(int players) {
 		return Math.min(ColorsHelper.MAX_SUPPORTED_TEAMS, Math.min(spawnpoints.size(), nexusLocations.size()));
 	}
-
-	public void exit(Player player) {
-		SpacePlayer spacePlayer = getArenaPlayer(player);
-		if (spacePlayer != null) {
-			exit(spacePlayer);
+	
+	@Override
+	protected void reset() {
+		super.reset();
+		if (plugin == null) {
+			// super class initialization called this
+			// method before the plugin reference was set
+			return;
 		}
+		if (playersPositionManager != null) {
+			playersPositionManager.stopClock();
+		}
+		playersPositionManager = new BasicTickablesManager();
+		playersPositionManager.registerTickable(new CirclesIntersectionManager(this));
+		playersPositionManager.startClock(plugin, 4);
 	}
-	
-	public void exit(SpacePlayer player) {
-		
-	}
-	
+
 	public void openGuiMenu(Player player) {
 		GuiKit gui = guiManager.getGui(GuiKit.class);
 		if (gui != null) {
@@ -139,6 +196,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	}
 
 	public boolean onBlockBroken(Player player, Block block) {
+		SpaceTeam playerTeam = getArenaPlayer(player).getTeam();
 		Material type = block.getType();
 		boolean isNexus = type == Nexus.NEXUS_MATERIAL;
 		if (!isNexus && type != Nexus.PILLAR_MATERIAL) {
@@ -152,7 +210,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		}
 		for (SpaceTeam team : teams) {
 			if (tester.apply(team)) {
-				return true;
+				return team != playerTeam;
 			}
 		}
 		return false;
@@ -165,7 +223,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		Location playerPos = player.getEyeLocation();
 		Location maxDistanceLocation = playerPos.clone().add(playerPos.getDirection().multiply(maxDistance));
 		if (!gun.isFmj()) {
-			Location collisionPoint = RayTrace.firstCollisionPoint(playerPos, maxDistanceLocation, new HashSet<Material>(), 0.05);
+			Location collisionPoint = RayTrace.firstCollisionPoint(playerPos, maxDistanceLocation, transparentBlocks, 0.05);
 			if (collisionPoint != null) {
 				maxDistanceLocation = collisionPoint;
 				maxDistance = playerPos.distance(maxDistanceLocation);
@@ -198,7 +256,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		if (event.isCancelled()) {
 			return;
 		}
-		ParticlesHelper.particlesLineColored(playerPos, maxDistanceLocation, 0.1, shooter.getTeam().getArmorColor(), 1);
+		ParticlesHelper.particlesLineColored(playerPos, maxDistanceLocation, 0.2, shooter.getTeam().getArmorColor(), 1);
 		world.playSound(player, gun.getSound(), 1, 32);
 	}
 
@@ -214,7 +272,18 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	}
 
 	public void onPlayerDeath(SpacePlayer spacePlayer) {
+		SpacePlayer killer = spacePlayer.getLastAttacker();
+		if (killer == null) {
+			broadcast(CommonsHelper.replaceAll(settingsMessages.getPlayerKilledSelf(), new String[] {"{player color}", "{player}"}, new String[] {spacePlayer.getTeam().getColorCode(), spacePlayer.getPlayer().getName()}));
+		} else {
+			broadcast(CommonsHelper.replaceAll(settingsMessages.getPlayerKilled(),
+					new String[] {"{player color}", "{player}", "{killer color}", "{killer}"},
+					new String[] {spacePlayer.getTeam().getColorCode(), spacePlayer.getPlayer().getName(), killer.getTeam().getColorCode(), killer.getPlayer().getName()}));
+		}
 		spacePlayer.onDeath();
+		if (spacePlayer.getLives() <= 0) {
+			exit(spacePlayer);
+		}
 	}
 
 	public int getCurrentTick() {
@@ -224,7 +293,56 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	public Powerup<SpacePlayer> getRandomPowerup() {
 		return powerupsManager.getRandomPowerup();
 	}
+	
+	public void giveRandomPowerup(SpacePlayer player) {
+		givePowerup(player, getRandomPowerup());
+	}
+	
+	public void givePowerup(SpacePlayer player, Powerup<SpacePlayer> powerup) {
+		if (powerup.doAction(player)) {
+			broadcast(CommonsHelper.replaceAll(settingsMessages.getPlayerGotPowerup(), new String[] {"{player color}", "{player}", "{powerup}"}, new String[] {player.getTeam().getColorCode(), player.getPlayer().getName(), powerup.getName()}));
+		}
+	}
 
+	public boolean setNexusLocation(Location location) {
+		boolean flag = nexusLocations.size() < spawnpoints.size();
+		if (flag) {
+			flag = nexusLocations.add(location);
+		}
+		return flag;
+	}
+
+	public List<Location> getNexusLocations() {
+		return new ArrayList<>(nexusLocations);
+	}
+
+	public int getNexusAmount() {
+		return nexusLocations.size();
+	}
+
+	public String getTeamName(int teamIndex) {
+		String[] teams = settingsTeams.getTeams();
+		return teamIndex >= 0 && teamIndex < teams.length ? teams[teamIndex] : null;
+	}
+
+	public String getColorCode(int teamIndex) {
+		String[] colors = settingsTeams.getColors();
+		return teamIndex >= 0 && teamIndex < colors.length ? colors[teamIndex] : null;
+	}
+
+	public void broadcast(String message) {
+		players.forEach(player -> CommonsHelper.info(player.getPlayer(), message));
+		spectators.forEach(player ->  CommonsHelper.info(player, message));
+	}
+
+	public void setCirclePowerup(Location location, double rotation) {
+		circles.add(new CirclePowerup(location, rotation));
+	}
+	
+	public List<CirclePowerup> getCircles() {
+		return new ArrayList<>(circles);
+	}
+	
 	public static void heal(Player player) {
 		player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 	}
@@ -234,16 +352,42 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		attribute.setBaseValue(attribute.getBaseValue() + health);
 	}
 
-	private void reset() {
-		reset(true);
+	List<SpacePlayer> getPlayersWithoutCopy() {
+		return players;
 	}
 
-	private void reset(boolean baseReset) {
-		if (baseReset) {
-			baseReset();
+	List<CirclePowerup> getCirclesWithoutCopy() {
+		return circles;
+	}
+	
+	private void buildNexuses() {
+		teams.forEach(team -> team.getNexus().build());
+	}
+	
+	private void exit(SpacePlayer player) {
+		players.remove(player);
+		String[] lookingFor = new String[] {"{player color}", "{player}"};
+		String[] replacements = new String[] {player.getTeam().getColorCode(), player.getPlayer().getName()};
+		if (player.getLives() == 0) {
+			broadcast(CommonsHelper.replaceAll(settingsMessages.getPlayerEliminated(), lookingFor, replacements));
+		} else {
+			broadcast(CommonsHelper.replaceAll(settingsMessages.getPlayerLeft(), lookingFor, replacements));
 		}
-		nexusLocations = new ArrayList<Location>();
-		powerupsManager = new BasicPowerupsManager<>(new PowerupsBuilder(settingsPowerups).createPowerups());
+		SpaceTeam team = player.getTeam();
+		team.removePlayer(player);
+		if (team.getPlayers().size() == 0) {
+			broadcast(CommonsHelper.replaceAll(settingsMessages.getTeamEliminated(), new String[] {"{team color}", "{team}"}, new String[] {team.getColorCode(), team.getName()}));
+		}
+	}
+
+	private boolean checkWinningConditions() {
+		int teamsAlive = 0;
+		for (SpaceTeam team : teams) {
+			if (team.getPlayers().size() > 0) {
+				teamsAlive ++;
+			}
+		}
+		return teamsAlive < 2;
 	}
 
 	private void selectRandomKitsIfNeeded() {
@@ -259,6 +403,10 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	}
 
 	private void giveStartingItems() {
-		players.forEach(spacePlayer -> spacePlayer.giveDefaultItems());
+		players.forEach(player -> player.giveDefaultItems());
+	}
+	
+	private void clearInventories() {
+		players.forEach(player -> player.getPlayer().getInventory().clear());
 	}
 }

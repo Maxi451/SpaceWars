@@ -13,7 +13,7 @@ public class Nexus implements Tickable {
 	public static final Material NEXUS_MATERIAL = Material.BEACON;
 	public static final Material PILLAR_MATERIAL = Material.OBSIDIAN;
 
-	private static final int DISTANCE_PILLAR_NEXUS = 2;
+	private static final int DISTANCE_PILLAR_NEXUS = 3;
 	private static final int DISTANCE_Y_PILLAR_NEXUS = -1;
 	
 	private SpaceTeam team;
@@ -21,14 +21,21 @@ public class Nexus implements Tickable {
 	private Pillar[] pillars;
 	private boolean isBroken;
 	
+	private Location centeredLocation;
+	private Location[] pillarsCenteredLocations;
+	
 	public Nexus(Location location) {
 		this.location = location;
+		centeredLocation = CommonsHelper.centerLocation(location);
 		pillars = new Pillar[] {
 				buildPillar(DISTANCE_PILLAR_NEXUS, 0),
 				buildPillar(-DISTANCE_PILLAR_NEXUS, 0),
 				buildPillar(0, DISTANCE_PILLAR_NEXUS),
 				buildPillar(0, -DISTANCE_PILLAR_NEXUS)
 		};
+		pillarsCenteredLocations = new Location[pillars.length];
+		for (int i = 0; i < pillarsCenteredLocations.length; i ++) 
+			pillarsCenteredLocations[i] = CommonsHelper.centerLocation(pillars[i].getLocation());
 	}
 
 	@Override
@@ -38,7 +45,7 @@ public class Nexus implements Tickable {
 		}
 		for (int i = 0; i < pillars.length; i ++) {
 			if (pillars[i].isEnabled()) {
-				ParticlesHelper.particlesLine(location, pillars[i].getLocation(), 0.1, Particle.FLAME);
+				ParticlesHelper.particlesLine(centeredLocation, pillarsCenteredLocations[i], 0.1, Particle.FLAME);
 			}
 		}
 	}

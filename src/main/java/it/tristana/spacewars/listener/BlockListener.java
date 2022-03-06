@@ -28,8 +28,9 @@ public class BlockListener implements Listener {
 			}
 			return;
 		}
-		if (arena.getStatus() != Status.PLAYING || !arena.onBlockBroken(player, event.getBlock())) {
-			event.setCancelled(true);
+		event.setCancelled(true);
+		if (arena.getStatus() == Status.PLAYING) {
+			arena.onBlockBroken(player, event.getBlock());
 		}
 	}
 }
