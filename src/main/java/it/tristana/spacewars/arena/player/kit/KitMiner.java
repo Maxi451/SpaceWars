@@ -31,6 +31,11 @@ public class KitMiner extends Kit {
 	}
 
 	@Override
+	public double getBaseArmor() {
+		return settings.getMinerArmor();
+	}
+
+	@Override
 	protected Gun forgeGun() {
 		return new GunMiner(settings);
 	}
@@ -40,10 +45,5 @@ public class KitMiner extends Kit {
 		ItemStack pickaxe = super.getRawPickaxe();
 		pickaxe.addUnsafeEnchantment(Enchantment.DIG_SPEED, 3);
 		return pickaxe;
-	}
-
-	@Override
-	public double getBaseArmor() {
-		return settings.getMinerArmor();
 	}
 }

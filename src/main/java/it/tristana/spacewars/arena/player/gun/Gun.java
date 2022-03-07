@@ -5,6 +5,7 @@ import org.bukkit.Sound;
 import org.bukkit.inventory.ItemStack;
 
 import it.tristana.commons.interfaces.Reloadable;
+import it.tristana.spacewars.arena.player.SpacePlayer;
 import it.tristana.spacewars.config.SettingsKits;
 
 public abstract class Gun implements Reloadable {
@@ -38,17 +39,13 @@ public abstract class Gun implements Reloadable {
 		return item.clone();
 	}
 	
-	public final boolean tryToShoot() {
+	public final boolean tryToShoot(SpacePlayer player) {
 		long millis = System.currentTimeMillis();
-		boolean result = millis >= lastShotTime + reloadTime;
+		boolean result = millis >= lastShotTime + getActualReloadTime(player);
 		if (result) {
 			lastShotTime = millis;
 		}
 		return result;
-	}
-	
-	public final double getDamage() {
-		return damage;
 	}
 	
 	public final long getReloadTime() {
@@ -78,6 +75,18 @@ public abstract class Gun implements Reloadable {
 	
 	public final boolean isThisItem(ItemStack other) {
 		return getItem().isSimilar(other);
+	}
+	
+	public double getDamage(SpacePlayer player) {
+		return damage;
+	}
+	
+	public double getTargetArmorReduced(double baseArmor, double bonusArmor) {
+		return 0;
+	}
+	
+	protected long getActualReloadTime(SpacePlayer player) {
+		return reloadTime;
 	}
 	
 	protected static ItemStack getDefaultItem() {

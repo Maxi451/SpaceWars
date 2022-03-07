@@ -34,11 +34,13 @@ import it.tristana.spacewars.arena.SpaceArenaLoader;
 import it.tristana.spacewars.arena.player.kit.KitsManager;
 import it.tristana.spacewars.chat.SpaceChatManager;
 import it.tristana.spacewars.command.SpaceCommand;
+import it.tristana.spacewars.config.ConfigArena;
 import it.tristana.spacewars.config.ConfigCommands;
 import it.tristana.spacewars.config.ConfigKits;
 import it.tristana.spacewars.config.ConfigMessages;
 import it.tristana.spacewars.config.ConfigPowerups;
 import it.tristana.spacewars.config.ConfigSpaceDatabase;
+import it.tristana.spacewars.config.SettingsArena;
 import it.tristana.spacewars.config.SettingsCommands;
 import it.tristana.spacewars.config.SettingsKits;
 import it.tristana.spacewars.config.SettingsMessages;
@@ -48,6 +50,7 @@ import it.tristana.spacewars.database.SpaceUser;
 import it.tristana.spacewars.gui.GuiKit;
 import it.tristana.spacewars.gui.SpaceClickedGuiManager;
 import it.tristana.spacewars.listener.BlockListener;
+import it.tristana.spacewars.listener.PlayerDamageListener;
 import it.tristana.spacewars.listener.PlayerDeathListener;
 import it.tristana.spacewars.listener.ShotListener;
 
@@ -66,6 +69,7 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 	private SettingsPowerups settingsPowerups;
 	private SettingsMessages settingsMessages;
 	private SettingsTeams settingsTeams;
+	private SettingsArena settingsArena;
 	
 	private DatabaseManager<SpaceUser> database;
 	private UsersManager<SpaceUser> usersManager;
@@ -128,6 +132,7 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 		settingsPowerups.setConfig(new ConfigPowerups(folder));
 		settingsMessages.setConfig(new ConfigMessages(folder));
 		settingsTeams.setConfig(new ConfigTeams(folder));
+		settingsArena.setConfig(new ConfigArena(folder));
 		clickedGuiManager.clearGuis();
 		registerGuis();
 	}
@@ -216,6 +221,7 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 		settingsPowerups = new SettingsPowerups(new ConfigPowerups(folder));
 		settingsMessages = new SettingsMessages(new ConfigMessages(folder));
 		settingsTeams = new SettingsTeams(new ConfigTeams(folder));
+		settingsArena = new SettingsArena(new ConfigArena(folder));
 	}
 	
 	private void loadManagers() throws NoSuchMethodException {
@@ -235,6 +241,7 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 		register(new ShotListener(arenasManager));
 		register(new PlayerDeathListener(arenasManager));
 		register(new BlockListener(arenasManager));
+		register(new PlayerDamageListener(arenasManager, settingsArena));
 	}
 	
 	private SpaceDatabase getDatabase() {

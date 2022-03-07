@@ -46,6 +46,8 @@ public class KitsManager {
 	public void loadDefaultKits() throws NoSuchMethodException {
 		registerKit(KitMiner.class);
 		registerKit(KitSoldier.class);
+		registerKit(KitSniper.class);
+		registerKit(KitDefender.class);
 	}
 	
 	public Kit[] getKitsView() {
@@ -58,7 +60,7 @@ public class KitsManager {
 	
 	@SuppressWarnings("unchecked")
 	private <K> Constructor<K> getConstructor(Class<K> clazz) {
-		for (EntryKit<? extends Kit> entry : kits) {
+		for (EntryKit<?> entry : kits) {
 			if (entry.clazz == clazz) {
 				return (Constructor<K>) entry.constructor;
 			}

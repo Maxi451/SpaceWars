@@ -7,11 +7,11 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import de.tr7zw.nbtapi.NBTItem;
-import de.tr7zw.nbtapi.NBTList;
 import it.tristana.commons.interfaces.Reloadable;
+import it.tristana.spacewars.arena.player.SpacePlayer;
 import it.tristana.spacewars.arena.player.gun.Gun;
 import it.tristana.spacewars.config.SettingsKits;
+import it.tristana.spacewars.helper.ItemUtils;
 
 public abstract class Kit implements Reloadable {
 
@@ -44,7 +44,7 @@ public abstract class Kit implements Reloadable {
 		return gun;
 	}
 	
-	public final double getArmor() {
+	public double getArmor(SpacePlayer player) {
 		return armor;
 	}
 	
@@ -55,7 +55,7 @@ public abstract class Kit implements Reloadable {
 	
 	public final ItemStack getPickaxe() {
 		if (pickaxe == null) {
-			pickaxe = forgeCanDestroyItem(getRawPickaxe());
+			pickaxe = ItemUtils.forgeUnbreakableItem(ItemUtils.forgeCanDestroyItem(getRawPickaxe(), "obsidian", "beacon"));
 		}
 		return pickaxe;
 	}
@@ -64,21 +64,13 @@ public abstract class Kit implements Reloadable {
 		return new ItemStack(PICKAXE_MATERIAL);
 	}
 	
-	private static ItemStack forgeCanDestroyItem(ItemStack item) {
-		NBTItem nbt = new NBTItem(item);
-		NBTList<String> canBreak = nbt.getStringList("CanDestroy");
-		canBreak.add("obsidian");
-		canBreak.add("beacon");
-		return nbt.getItem();
-	}
-	
 	public abstract ItemStack getRawDisplayItem();
 	
 	public abstract String getName();
 	
 	public abstract List<String> getLore();
 	
-	protected abstract double getBaseArmor();
+	public abstract double getBaseArmor();
 	
 	protected abstract Gun forgeGun();
 }

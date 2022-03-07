@@ -6,16 +6,17 @@ import it.tristana.spacewars.config.SettingsPowerups;
 
 public class PowerupsBuilder {
 	
-	private SettingsPowerups settings;
+	private PowerupsBuilder() {}
 	
-	public PowerupsBuilder(SettingsPowerups settings) {
-		this.settings = settings;
-	}
-	
-	public Powerup<SpacePlayer>[] createPowerups() {
+	public static Powerup<SpacePlayer>[] createPowerups(SettingsPowerups settings) {
 		return new SpacePowerup[] {
 			new Powerup1Up(settings),
-			new PowerupLongBarrel(settings)
+			new PowerupLongBarrel(settings),
+			new PowerupMedicKit(settings),
+			new PowerupFmj(settings),
+			new PowerupMoney(settings),
+			new PowerupFuel(settings),
+			new PowerupBetterPickaxes(settings)
 		};
 	}
 }

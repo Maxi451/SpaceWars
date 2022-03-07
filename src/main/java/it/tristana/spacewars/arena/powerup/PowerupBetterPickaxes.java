@@ -3,28 +3,27 @@ package it.tristana.spacewars.arena.powerup;
 import it.tristana.spacewars.arena.player.SpacePlayer;
 import it.tristana.spacewars.config.SettingsPowerups;
 
-public class Powerup1Up extends SpacePowerup {
+public class PowerupBetterPickaxes extends SpacePowerup {
 
-	public Powerup1Up(SettingsPowerups settings) {
+	PowerupBetterPickaxes(SettingsPowerups settings) {
 		super(settings);
 	}
 
 	@Override
 	public boolean doAction(SpacePlayer arenaPlayer) {
-		boolean isNotNexusBroken = !arenaPlayer.getTeam().getNexus().isBroken();
-		if (isNotNexusBroken) {
-			arenaPlayer.onLife();
-		}
-		return isNotNexusBroken;
+		arenaPlayer.getTeam().getPlayers().forEach(player -> {
+			player.upgradePickaxe();
+		});
+		return true;
 	}
 
 	@Override
 	public String getName() {
-		return settings.get_1upName();
+		return settings.getBetterPickaxesName();
 	}
 
 	@Override
 	public int getSpawnChance() {
-		return settings.get_1upChance();
+		return settings.getBetterPickaxesChance();
 	}
 }

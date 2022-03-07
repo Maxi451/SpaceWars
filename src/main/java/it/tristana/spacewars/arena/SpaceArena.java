@@ -1,12 +1,9 @@
 package it.tristana.spacewars.arena;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -28,12 +25,10 @@ import it.tristana.commons.interfaces.gui.ClickedGuiManager;
 import it.tristana.commons.interfaces.util.Powerup;
 import it.tristana.commons.interfaces.util.PowerupsManager;
 import it.tristana.commons.interfaces.util.TickablesManager;
-import it.tristana.commons.math.AABB;
 import it.tristana.commons.math.Ray;
-import it.tristana.commons.math.RayTrace;
 import it.tristana.spacewars.Main;
 import it.tristana.spacewars.arena.player.SpacePlayer;
-import it.tristana.spacewars.arena.player.gun.Gun;
+import it.tristana.spacewars.arena.player.kit.Kit;
 import it.tristana.spacewars.arena.player.kit.KitsManager;
 import it.tristana.spacewars.arena.powerup.PowerupsBuilder;
 import it.tristana.spacewars.arena.team.ColorsHelper;
@@ -42,16 +37,10 @@ import it.tristana.spacewars.arena.team.SpaceTeam;
 import it.tristana.spacewars.config.SettingsMessages;
 import it.tristana.spacewars.config.SettingsPowerups;
 import it.tristana.spacewars.database.SpaceUser;
-import it.tristana.spacewars.event.SpacePlayerShotEvent;
 import it.tristana.spacewars.gui.GuiKit;
 import it.tristana.spacewars.helper.ParticlesHelper;
 
 public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> implements Reloadable {
-
-	private static final Set<Material> transparentBlocks = new HashSet<Material>();
-	static {
-		transparentBlocks.add(Material.AIR);
-	}
 	
 	private final Main plugin;
 	private final UsersManager<SpaceUser> usersManager;
@@ -80,7 +69,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		this.settingsTeams = plugin.getSettingsTeams();
 		nexusLocations = new ArrayList<>();
 		circles = new ArrayList<>();
-		powerupsManager = new BasicPowerupsManager<>(new PowerupsBuilder(settingsPowerups).createPowerups());
+		powerupsManager = new BasicPowerupsManager<>(PowerupsBuilder.createPowerups(settingsPowerups));
 		reset();
 	}
 
@@ -195,9 +184,10 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		}
 	}
 
-	public boolean onBlockBroken(Player player, Block block) {
-		SpaceTeam playerTeam = getArenaPlayer(player).getTeam();
+	public boolean onBlockBroken(SpacePlayer player, Block block) {
+		SpaceTeam playerTeam = player.getTeam();
 		Material type = block.getType();
+		Location blockPos = block.getLocation();
 		boolean isNexus = type == Nexus.NEXUS_MATERIAL;
 		if (!isNexus && type != Nexus.PILLAR_MATERIAL) {
 			return false;
@@ -206,7 +196,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		if (isNexus) {
 			tester = team -> { return team.getNexus().breakNexus(); };
 		} else {
-			tester = team -> { return team.getNexus().breakPillar(block.getLocation()); };
+			tester = team -> { return team.getNexus().breakPillar(blockPos); };
 		}
 		for (SpaceTeam team : teams) {
 			if (tester.apply(team)) {
@@ -217,51 +207,18 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	}
 
 	public void onShot(SpacePlayer shooter) {
-		Gun gun = shooter.getKit().getGun();
-		double maxDistance = gun.isLongBarrel() ? 75 : 50;
-		Player player = shooter.getPlayer();
-		Location playerPos = player.getEyeLocation();
-		Location maxDistanceLocation = playerPos.clone().add(playerPos.getDirection().multiply(maxDistance));
-		if (!gun.isFmj()) {
-			Location collisionPoint = RayTrace.firstCollisionPoint(playerPos, maxDistanceLocation, transparentBlocks, 0.05);
-			if (collisionPoint != null) {
-				maxDistanceLocation = collisionPoint;
-				maxDistance = playerPos.distance(maxDistanceLocation);
-			}
-		}
-		SpaceTeam team = shooter.getTeam();
-		double minDistance = Double.MAX_VALUE;
-		SpacePlayer targetFound = null;
-		for (SpacePlayer target : players) {
-			if (team == target.getTeam()) {
-				continue;
-			}
-			Player targetPlayer = target.getPlayer();
-			boolean isGliding = targetPlayer.isGliding();
-			if (RayTrace.canHit(player, targetPlayer, maxDistance, isGliding ? 0.25 : 0, isGliding)) {
-				double distance = playerPos.distance(targetPlayer.getEyeLocation());
-				if (distance < minDistance) {
-					targetFound = target;
-					minDistance = distance;
-				}
-			}
-		}
-		if (targetFound != null) {
-			Player targetPlayer = targetFound.getPlayer();
-			onDamage(targetFound, shooter, gun.getDamage());
-			maxDistanceLocation = targetPlayer.isGliding() ? AABB.getElytraPlayerEyesPos(targetPlayer) : targetPlayer.getEyeLocation();
-		}
-		SpacePlayerShotEvent event = new SpacePlayerShotEvent(shooter, targetFound);
-		Bukkit.getPluginManager().callEvent(event);
-		if (event.isCancelled()) {
-			return;
-		}
-		ParticlesHelper.particlesLineColored(playerPos, maxDistanceLocation, 0.2, shooter.getTeam().getArmorColor(), 1);
-		world.playSound(player, gun.getSound(), 1, 32);
+		ShotManager.onShot(this, shooter);
 	}
 
 	public void onDamage(SpacePlayer player, SpacePlayer damager, double damage) {
-		onTrueDamage(player, damager, 100d / Math.max(1, 100 + player.getKit().getArmor()) * damage);
+		Kit kit = player.getKit();
+		double totalArmor = kit.getArmor(player);
+		if (damager != null) {
+			double baseArmor = kit.getBaseArmor();
+			double bonusArmor = totalArmor - baseArmor;
+			totalArmor -= damager.getKit().getGun().getTargetArmorReduced(baseArmor, bonusArmor);
+		}
+		onTrueDamage(player, damager, 100d / Math.max(1, 100 + totalArmor) * damage);
 	}
 
 	public void onTrueDamage(SpacePlayer player, SpacePlayer damager, double damage) {

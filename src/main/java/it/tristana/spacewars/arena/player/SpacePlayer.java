@@ -42,7 +42,8 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		giveTickMoney();
 		if (-- ticksToRespawn > 0) {
 			return;
-		} else if (ticksToRespawn == 0) {
+		}
+		if (ticksToRespawn == 0) {
 			respawn();
 			return;
 		}
@@ -101,11 +102,42 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	
 	public void upgradePickaxe() {
 		kit.upgradePickaxe();
+		int slot = getPickaxeSlot();
+		if (slot >= 0) {
+			player.getInventory().setItem(slot, kit.getPickaxe());
+		}
+	}
+	
+	public void giveMoney(double money) {
+		this.money += money;
+		player.setLevel((int) money);
+	}
+	
+	public boolean tryToPay(double money) {
+		boolean flag = this.money >= money;
+		if (flag) {
+			giveMoney(-money);
+		}
+		return flag;
+	}
+	
+	public void giveFuel(int amount) {
+		player.getInventory().addItem(new ItemStack(Material.FIREWORK_ROCKET));
+		onRefuel();
+	}
+	
+	private int getPickaxeSlot() {
+		ItemStack[] items = player.getInventory().getContents();
+		for (int i = 0; i < items.length; i ++) {
+			if (items[i] != null && items[i].getType() == Kit.PICKAXE_MATERIAL) {
+				return i;
+			}
+		}
+		return -1;
 	}
 	
 	private void giveTickMoney() {
-		money += Math.pow(arena.getCurrentTick(), 0.25);
-		player.setLevel((int) money);
+		giveMoney(Math.pow(arena.getCurrentTick(), 0.25));
 	}
 	
 	private void respawn() {
@@ -117,9 +149,9 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		if (hasFuel()) {
 			onRefuel();
 		} else if (-- ticksForFuel <= 0) {
-			giveFuel();
+			giveFuel(1);
 		}
-		user.getPlayer().setExp((float) ticksForFuel / TICKS_FOR_FUEL);
+		user.getPlayer().setExp(1 - (float) ticksForFuel / TICKS_FOR_FUEL);
 	}
 	
 	private boolean hasFuel() {
@@ -132,11 +164,6 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 			}
 		}
 		return false;
-	}
-	
-	private void giveFuel() {
-		player.getInventory().addItem(new ItemStack(Material.FIREWORK_ROCKET));
-		onRefuel();
 	}
 	
 	private void onRefuel() {

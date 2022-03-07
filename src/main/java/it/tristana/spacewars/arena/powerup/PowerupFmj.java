@@ -4,29 +4,29 @@ import it.tristana.spacewars.arena.player.SpacePlayer;
 import it.tristana.spacewars.arena.player.gun.Gun;
 import it.tristana.spacewars.config.SettingsPowerups;
 
-public class PowerupLongBarrel extends SpacePowerup {
+public class PowerupFmj extends SpacePowerup {
 
-	public PowerupLongBarrel(SettingsPowerups settings) {
+	PowerupFmj(SettingsPowerups settings) {
 		super(settings);
 	}
 
 	@Override
 	public boolean doAction(SpacePlayer arenaPlayer) {
 		Gun gun = arenaPlayer.getKit().getGun();
-		boolean doesNotHaveLongBarrel = !gun.isLongBarrel();
-		if (doesNotHaveLongBarrel) {
-			gun.onLongBarrel();
+		boolean doesNotHaveFmj = !gun.isFmj();
+		if (doesNotHaveFmj) {
+			gun.onFmj();
 		}
-		return doesNotHaveLongBarrel;
+		return doesNotHaveFmj;
 	}
 
 	@Override
 	public String getName() {
-		return settings.getLongBarrelName();
+		return settings.getFmjName();
 	}
 
 	@Override
 	public int getSpawnChance() {
-		return settings.getLongBarrelChance();
+		return settings.getFmjChance();
 	}
 }

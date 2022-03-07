@@ -28,7 +28,7 @@ public class ShotListener implements Listener {
 		}
 		SpacePlayer spacePlayer = arena.getArenaPlayer(player);
 		Gun gun = spacePlayer.getKit().getGun();
-		if (gun.isThisItem(player.getInventory().getItemInMainHand()) && gun.tryToShoot()) {
+		if (gun.isThisItem(player.getInventory().getItemInMainHand()) && gun.tryToShoot(spacePlayer)) {
 			arena.onShot(spacePlayer);
 		}
 	}

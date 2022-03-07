@@ -22,7 +22,7 @@ public class SpaceArenaLoader extends BasicArenaLoader<SpaceArena> {
 	private final Main plugin;
 	
 	public SpaceArenaLoader(File folder, Main plugin) {
-		super(new File(folder, "arena.yml"));
+		super(new File(folder, "saved-maps.yml"));
 		this.plugin = plugin;
 	}
 

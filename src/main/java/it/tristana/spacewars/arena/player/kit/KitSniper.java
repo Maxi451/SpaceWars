@@ -6,37 +6,37 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import it.tristana.spacewars.arena.player.gun.Gun;
-import it.tristana.spacewars.arena.player.gun.GunSoldier;
+import it.tristana.spacewars.arena.player.gun.GunSniper;
 import it.tristana.spacewars.config.SettingsKits;
 
-public class KitSoldier extends Kit {
+public class KitSniper extends Kit {
 
-	public KitSoldier(SettingsKits settings) {
+	public KitSniper(SettingsKits settings) {
 		super(settings);
 	}
 
 	@Override
 	public ItemStack getRawDisplayItem() {
-		return new ItemStack(Material.IRON_CHESTPLATE);
+		return new ItemStack(Material.BOW);
 	}
 
 	@Override
 	public String getName() {
-		return settings.getSoldierName();
+		return settings.getSniperName();
 	}
 
 	@Override
 	public List<String> getLore() {
-		return settings.getSoldierLore();
+		return settings.getSniperLore();
 	}
 
 	@Override
 	public double getBaseArmor() {
-		return settings.getSoldierArmor();
+		return settings.getSniperArmor();
 	}
 
 	@Override
 	protected Gun forgeGun() {
-		return new GunSoldier(settings);
+		return new GunSniper(settings);
 	}
 }
