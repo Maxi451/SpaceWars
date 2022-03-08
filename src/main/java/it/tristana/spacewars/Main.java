@@ -49,6 +49,7 @@ import it.tristana.spacewars.database.SpaceDatabase;
 import it.tristana.spacewars.database.SpaceUser;
 import it.tristana.spacewars.gui.GuiKit;
 import it.tristana.spacewars.gui.SpaceClickedGuiManager;
+import it.tristana.spacewars.helper.SpaceLoginAction;
 import it.tristana.spacewars.listener.BlockListener;
 import it.tristana.spacewars.listener.PlayerDamageListener;
 import it.tristana.spacewars.listener.PlayerDeathListener;
@@ -194,7 +195,13 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 	}
 	
 	private void closeArenas() {
-		arenasManager.getArenas().forEach(arena -> arena.closeArena());
+		for (SpaceArena arena : arenasManager.getArenas()) {
+			try {
+				arena.closeArena();
+			} catch (Exception e) {
+				writeThrowableOnErrorsFile(e);
+			}
+		}
 	}
 	
 	private void saveArenas() {
@@ -235,7 +242,7 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 	}
 	
 	private void registerListeners() {
-		register(new LoginQuitListener<>(usersManager, database, null, null));
+		register(new LoginQuitListener<>(usersManager, database, new SpaceLoginAction(this), null));
 		register(new ChatListener(chatManager));
 		register(new GuiListener(clickedGuiManager));
 		register(new ShotListener(arenasManager));
