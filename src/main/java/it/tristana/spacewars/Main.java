@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.command.PluginCommand;
 
 import it.tristana.commons.arena.BasicArenasManager;
 import it.tristana.commons.config.ConfigDefaultCommands;
@@ -102,7 +103,10 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 			return;
 		}
 		registerListeners();
-		Bukkit.getPluginCommand(COMMAND).setExecutor(new SpaceCommand(this, settingsDefaultCommands, "sw", settingsCommands));
+		PluginCommand cmd = Bukkit.getPluginCommand(COMMAND);
+		SpaceCommand spaceCommand = new SpaceCommand(this, settingsDefaultCommands, "sw", settingsCommands);
+		cmd.setTabCompleter(spaceCommand);
+		cmd.setExecutor(spaceCommand);
 	}
 	
 	@Override
