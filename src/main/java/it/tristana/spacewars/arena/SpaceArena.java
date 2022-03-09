@@ -351,7 +351,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	private void selectRandomKitsIfNeeded() {
 		players.forEach(player -> {
 			if (player.getKit() == null) {
-				player.setKit(kitsManager.getRandomKit());
+				player.setKit(kitsManager.getRandom());
 			}
 		});
 	}
