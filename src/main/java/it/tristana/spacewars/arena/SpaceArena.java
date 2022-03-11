@@ -37,7 +37,7 @@ import it.tristana.spacewars.arena.team.SpaceTeam;
 import it.tristana.spacewars.config.SettingsMessages;
 import it.tristana.spacewars.config.SettingsPowerups;
 import it.tristana.spacewars.database.SpaceUser;
-import it.tristana.spacewars.gui.GuiKit;
+import it.tristana.spacewars.gui.kit.GuiKit;
 import it.tristana.spacewars.helper.ParticlesHelper;
 
 public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> implements Reloadable {
