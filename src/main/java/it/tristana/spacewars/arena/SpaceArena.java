@@ -141,7 +141,8 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		circles.forEach(circle -> {
 			Ray[] rays = circle.getRays();
 			for (int i = 0; i < rays.length; i ++) {
-				ParticlesHelper.particlesLine(rays[i].getOrigin().clone().toLocation(world), rays[i].getOrigin().clone().add(rays[i].getDirection().multiply(CirclePowerup.RADIUS)).toLocation(world), 0.5, Particle.FLAME);
+				Location pos = rays[i].getOrigin().clone().toLocation(world);
+				ParticlesHelper.particlesLine(pos, pos.add(rays[i].getDirection().clone().normalize().multiply(CirclePowerup.RADIUS)), 0.5, Particle.FLAME);
 			}
 		});
 	}
