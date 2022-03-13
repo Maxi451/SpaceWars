@@ -1,4 +1,4 @@
-package it.tristana.spacewars.gui;
+package it.tristana.spacewars.gui.kit;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

@@ -1,6 +1,10 @@
 package it.tristana.spacewars.command;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.command.CommandSender;
+import org.bukkit.util.StringUtil;
 
 import it.tristana.commons.helper.CommonsHelper;
 import it.tristana.spacewars.arena.SpaceArena;
@@ -24,6 +28,15 @@ public class CommandDelete extends SpaceSubCommand {
 		CommonsHelper.info(sender, settings.getDeleteExecuted());
 	}
 
+	@Override
+	protected List<String> onTab(CommandSender sender, String[] args) {
+		List<String> names = arenasManager.getArenas().stream().map(arena -> arena.getName()).toList();
+		if (args.length < 2) {
+			return names;
+		}
+		return StringUtil.copyPartialMatches(args[1], names, new ArrayList<>());
+	}
+	
 	@Override
 	protected boolean requiresPlayer() {
 		return false;

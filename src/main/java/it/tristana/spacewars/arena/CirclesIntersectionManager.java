@@ -30,7 +30,7 @@ public class CirclesIntersectionManager implements Tickable {
 				if (circle.intersects(player, 0)) {
 					if (circle.tryToPickUp()) {
 						arena.giveRandomPowerup(spacePlayer);
-						player.setVelocity(player.getVelocity().multiply(MAX_SPEED_MULTIPLIER - circle.getLocation().distance(player.getLocation()) / CirclePowerup.RADIUS));
+						player.setVelocity(player.getVelocity().multiply(MAX_SPEED_MULTIPLIER - circle.getLocation().distance(player.getLocation()) / CirclePowerup.DIAMETER));
 					}
 					break;
 				}

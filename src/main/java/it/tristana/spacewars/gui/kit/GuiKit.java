@@ -1,4 +1,6 @@
-package it.tristana.spacewars.gui;
+package it.tristana.spacewars.gui.kit;
+
+import org.bukkit.entity.Player;
 
 import it.tristana.commons.gui.BasicGui;
 import it.tristana.commons.interfaces.gui.Element;
@@ -15,7 +17,7 @@ public class GuiKit extends BasicGui {
 	}
 
 	@Override
-	protected Element[] createElements() {
+	protected Element[] getElements(Player player) {
 		Kit[] kits = kitsManager.getKitsView();
 		Element[] elements = new Element[kits.length];
 		for (int i = 0; i < elements.length; i ++) {

@@ -37,7 +37,7 @@ import it.tristana.spacewars.arena.team.SpaceTeam;
 import it.tristana.spacewars.config.SettingsMessages;
 import it.tristana.spacewars.config.SettingsPowerups;
 import it.tristana.spacewars.database.SpaceUser;
-import it.tristana.spacewars.gui.GuiKit;
+import it.tristana.spacewars.gui.kit.GuiKit;
 import it.tristana.spacewars.helper.ParticlesHelper;
 
 public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> implements Reloadable {
@@ -142,7 +142,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 			Ray[] rays = circle.getRays();
 			for (int i = 0; i < rays.length; i ++) {
 				Location pos = rays[i].getOrigin().clone().toLocation(world);
-				ParticlesHelper.particlesLine(pos, pos.add(rays[i].getDirection().clone().normalize().multiply(CirclePowerup.RADIUS)), 0.5, Particle.FLAME);
+				ParticlesHelper.particlesLine(pos, pos.clone().add(rays[i].getDirection().normalize().multiply(CirclePowerup.DIAMETER)), 0.5, Particle.FLAME);
 			}
 		});
 	}
@@ -351,7 +351,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	private void selectRandomKitsIfNeeded() {
 		players.forEach(player -> {
 			if (player.getKit() == null) {
-				player.setKit(kitsManager.getRandomKit());
+				player.setKit(kitsManager.getRandom());
 			}
 		});
 	}

@@ -14,10 +14,10 @@ import it.tristana.spacewars.helper.ParticlesHelper;
 
 public class CirclePowerup implements Tickable {
 	
-	public static final double RADIUS = 5;
+	public static final double DIAMETER = 5;
 
 	private static final int TICKS_TO_RECHARGE = 8;
-	private static final CircleEuclideanHelper circleEuclidean = new CircleEuclideanHelper(5, 64);
+	private static final CircleEuclideanHelper circleEuclidean = new CircleEuclideanHelper(DIAMETER, 64);
 	
 	private final Location location;
 	private final CachedCircleEuclidean circle;

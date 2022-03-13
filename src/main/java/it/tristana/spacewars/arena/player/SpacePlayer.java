@@ -8,13 +8,14 @@ import org.bukkit.inventory.PlayerInventory;
 
 import it.tristana.commons.arena.player.BasicArenaPlayer;
 import it.tristana.commons.interfaces.Tickable;
+import it.tristana.commons.interfaces.shop.BalanceHolder;
 import it.tristana.spacewars.arena.Shootable;
 import it.tristana.spacewars.arena.SpaceArena;
 import it.tristana.spacewars.arena.player.kit.Kit;
 import it.tristana.spacewars.arena.team.SpaceTeam;
 import it.tristana.spacewars.database.SpaceUser;
 
-public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> implements Tickable, Shootable {
+public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> implements Tickable, Shootable, BalanceHolder {
 
 	private static final int TICKS_FOR_FUEL = 8;
 	private static final int TICKS_FOR_RESPAWN = 5;
@@ -22,6 +23,8 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	
 	private SpaceUser user;
 	private Kit kit;
+	private double bonusArmor;
+	private double bonusDamage;
 	
 	private SpacePlayer lastAttacker;
 	
@@ -48,6 +51,26 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 			return;
 		}
 		checkFuel();
+	}
+	
+	@Override
+	public void giveMoney(double money) {
+		this.money += money;
+		player.setLevel((int) money);
+	}
+	
+	@Override
+	public double getMoney() {
+		return money;
+	}
+	
+	@Override
+	public boolean tryToPay(double money) {
+		boolean flag = this.money >= money;
+		if (flag) {
+			giveMoney(-money);
+		}
+		return flag;
 	}
 	
 	public void onDeath() {
@@ -88,6 +111,30 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		return kit;
 	}
 	
+	public void addBonusArmor(double bonusArmor) {
+		this.bonusArmor = bonusArmor;
+	}
+	
+	public double getBonusArmor() {
+		return bonusArmor;
+	}
+	
+	public double getTotalArmor() {
+		return kit.getArmor(this) + bonusArmor;
+	}
+	
+	public void addBonusDamage(double bonusDamage) {
+		this.bonusDamage = bonusDamage;
+	}
+	
+	public double getBonusDamage() {
+		return bonusDamage;
+	}
+	
+	public double getTotalDamage() {
+		return kit.getGun().getDamage(this) + bonusDamage;
+	}
+	
 	public void setLastAttacker(SpacePlayer lastAttacker) {
 		this.lastAttacker = lastAttacker;
 	}
@@ -106,19 +153,6 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		if (slot >= 0) {
 			player.getInventory().setItem(slot, kit.getPickaxe());
 		}
-	}
-	
-	public void giveMoney(double money) {
-		this.money += money;
-		player.setLevel((int) money);
-	}
-	
-	public boolean tryToPay(double money) {
-		boolean flag = this.money >= money;
-		if (flag) {
-			giveMoney(-money);
-		}
-		return flag;
 	}
 	
 	public void giveFuel(int amount) {
