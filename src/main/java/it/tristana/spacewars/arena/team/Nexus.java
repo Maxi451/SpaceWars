@@ -26,7 +26,7 @@ public class Nexus implements Tickable {
 	
 	public Nexus(Location location) {
 		this.location = location;
-		centeredLocation = CommonsHelper.centerLocation(location);
+		centeredLocation = CommonsHelper.centerLocation(location).add(0, 0.5, 0);
 		pillars = new Pillar[] {
 				buildPillar(DISTANCE_PILLAR_NEXUS, 0),
 				buildPillar(-DISTANCE_PILLAR_NEXUS, 0),
@@ -34,8 +34,9 @@ public class Nexus implements Tickable {
 				buildPillar(0, -DISTANCE_PILLAR_NEXUS)
 		};
 		pillarsCenteredLocations = new Location[pillars.length];
-		for (int i = 0; i < pillarsCenteredLocations.length; i ++) 
-			pillarsCenteredLocations[i] = CommonsHelper.centerLocation(pillars[i].getLocation());
+		for (int i = 0; i < pillarsCenteredLocations.length; i ++) {
+			pillarsCenteredLocations[i] = CommonsHelper.centerLocation(pillars[i].getLocation()).add(0, 0.5, 0);
+		}
 	}
 
 	@Override

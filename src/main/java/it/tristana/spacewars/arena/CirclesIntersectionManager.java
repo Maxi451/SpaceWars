@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
+import it.tristana.commons.helper.CommonsHelper;
 import it.tristana.commons.interfaces.Tickable;
 import it.tristana.spacewars.arena.player.SpacePlayer;
 
@@ -30,7 +31,10 @@ public class CirclesIntersectionManager implements Tickable {
 				if (circle.intersects(player, 0)) {
 					if (circle.tryToPickUp()) {
 						arena.giveRandomPowerup(spacePlayer);
-						player.setVelocity(player.getVelocity().multiply(MAX_SPEED_MULTIPLIER - circle.getLocation().distance(player.getLocation()) / CirclePowerup.DIAMETER));
+						CommonsHelper.broadcast(String.format("Speed x%.2f", 1 + (MAX_SPEED_MULTIPLIER * circle.getLocation().distance(player.getLocation()) / CirclePowerup.DIAMETER)));
+						CommonsHelper.broadcast(String.format("Before: x%.2f", player.getVelocity().length()));
+						player.setVelocity(player.getVelocity().multiply(1 + (MAX_SPEED_MULTIPLIER * circle.getLocation().distance(player.getLocation()) / CirclePowerup.DIAMETER)));
+						CommonsHelper.broadcast(String.format("After: x%.2f", player.getVelocity().length()));
 					}
 					break;
 				}

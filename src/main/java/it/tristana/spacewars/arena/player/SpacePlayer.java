@@ -56,7 +56,7 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	@Override
 	public void giveMoney(double money) {
 		this.money += money;
-		player.setLevel((int) money);
+		player.setLevel((int) this.money);
 	}
 	
 	@Override

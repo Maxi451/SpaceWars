@@ -51,9 +51,11 @@ import it.tristana.spacewars.database.SpaceUser;
 import it.tristana.spacewars.gui.SpaceClickedGuiManager;
 import it.tristana.spacewars.gui.kit.GuiKit;
 import it.tristana.spacewars.helper.SpaceLoginAction;
+import it.tristana.spacewars.helper.SpaceQuitAction;
 import it.tristana.spacewars.listener.BlockListener;
 import it.tristana.spacewars.listener.PlayerDamageListener;
 import it.tristana.spacewars.listener.PlayerDeathListener;
+import it.tristana.spacewars.listener.RemovedEventsListener;
 import it.tristana.spacewars.listener.ShotListener;
 
 public class Main extends PluginDraft implements Reloadable, DatabaseHolder, PartiesHolder {
@@ -95,7 +97,6 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 			return;
 		}
 		createSettings();
-		loadArenas();
 		try {
 			loadManagers();
 		} catch (Exception e) {
@@ -103,6 +104,7 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 			return;
 		}
 		registerListeners();
+		loadArenas();
 		PluginCommand cmd = Bukkit.getPluginCommand(COMMAND);
 		SpaceCommand spaceCommand = new SpaceCommand(this, settingsDefaultCommands, "sw", settingsCommands);
 		cmd.setTabCompleter(spaceCommand);
@@ -217,8 +219,7 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 	
 	private void loadArenas() {
 		arenaLoader = new SpaceArenaLoader(folder, this);
-		mainLobby = getMainLobby();
-		arenasManager = new BasicArenasManager<>();
+		mainLobby = arenaLoader.getMainLobby();
 		if (mainLobby != null) {
 			arenaLoader.loadArenas().forEach(arena -> arenasManager.addArena(arena));
 		}
@@ -236,6 +237,7 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 	}
 	
 	private void loadManagers() throws NoSuchMethodException {
+		arenasManager = new BasicArenasManager<>();
 		usersManager = new BasicUsersManager<>(database);
 		chatManager = new SpaceChatManager();
 		clickedGuiManager = new SpaceClickedGuiManager();
@@ -246,13 +248,14 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 	}
 	
 	private void registerListeners() {
-		register(new LoginQuitListener<>(usersManager, database, new SpaceLoginAction(this), null));
+		register(new LoginQuitListener<>(usersManager, database, new SpaceLoginAction(this), new SpaceQuitAction(this)));
 		register(new ChatListener(chatManager));
 		register(new GuiListener(clickedGuiManager));
 		register(new ShotListener(arenasManager));
 		register(new PlayerDeathListener(arenasManager));
 		register(new BlockListener(arenasManager));
 		register(new PlayerDamageListener(arenasManager, settingsArena));
+		register(new RemovedEventsListener());
 	}
 	
 	private SpaceDatabase getDatabase() {

@@ -1,12 +1,12 @@
 package it.tristana.spacewars.arena;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -25,7 +25,6 @@ import it.tristana.commons.interfaces.gui.ClickedGuiManager;
 import it.tristana.commons.interfaces.util.Powerup;
 import it.tristana.commons.interfaces.util.PowerupsManager;
 import it.tristana.commons.interfaces.util.TickablesManager;
-import it.tristana.commons.math.Ray;
 import it.tristana.spacewars.Main;
 import it.tristana.spacewars.arena.player.SpacePlayer;
 import it.tristana.spacewars.arena.player.kit.Kit;
@@ -38,7 +37,6 @@ import it.tristana.spacewars.config.SettingsMessages;
 import it.tristana.spacewars.config.SettingsPowerups;
 import it.tristana.spacewars.database.SpaceUser;
 import it.tristana.spacewars.gui.kit.GuiKit;
-import it.tristana.spacewars.helper.ParticlesHelper;
 
 public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> implements Reloadable {
 	
@@ -83,8 +81,8 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		super.startGame();
 		selectRandomKitsIfNeeded();
 		clearInventories();
-		giveStartingItems();
-		changeGameModes();
+		players.forEach(SpacePlayer::giveDefaultItems);
+		players.forEach(SpacePlayer::setPlayingGameMode);
 		buildNexuses();
 	}
 
@@ -104,9 +102,9 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 
 	@Override
 	public void closeArena() {
-		players.forEach(player -> {
-			exit(player);
-		});
+		for (int i = players.size() - 1; i >= 0; i --) {
+			exit(players.get(i));
+		}
 		reset();
 	}
 
@@ -133,18 +131,12 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		currentTick ++;
 		if (checkWinningConditions()) {
 			setStatus(Status.ENDING);
+			CommonsHelper.broadcast("Game ended");
 			return;
 		}
-		teams.forEach(team -> team.runTick());
-		players.forEach(player -> player.runTick());
-		circles.forEach(circle -> circle.runTick());
-		circles.forEach(circle -> {
-			Ray[] rays = circle.getRays();
-			for (int i = 0; i < rays.length; i ++) {
-				Location pos = rays[i].getOrigin().clone().toLocation(world);
-				ParticlesHelper.particlesLine(pos, pos.clone().add(rays[i].getDirection().normalize().multiply(CirclePowerup.DIAMETER)), 0.5, Particle.FLAME);
-			}
-		});
+		teams.forEach(SpaceTeam::runTick);
+		players.forEach(SpacePlayer::runTick);
+		circles.forEach(CirclePowerup::runTick);
 	}
 
 	@Override
@@ -175,7 +167,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		}
 		playersPositionManager = new BasicTickablesManager();
 		playersPositionManager.registerTickable(new CirclesIntersectionManager(this));
-		playersPositionManager.startClock(plugin, 4);
+		playersPositionManager.startClock(plugin, 1);
 	}
 
 	public void openGuiMenu(Player player) {
@@ -193,12 +185,9 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		if (!isNexus && type != Nexus.PILLAR_MATERIAL) {
 			return false;
 		}
-		Function<SpaceTeam, Boolean> tester; 
-		if (isNexus) {
-			tester = team -> { return team.getNexus().breakNexus(); };
-		} else {
-			tester = team -> { return team.getNexus().breakPillar(blockPos); };
-		}
+		Function<SpaceTeam, Boolean> tester = isNexus
+				? team -> { return team.getNexus().breakNexus(); }
+				: team -> { return team.getNexus().breakPillar(blockPos); };
 		for (SpaceTeam team : teams) {
 			if (tester.apply(team)) {
 				return team != playerTeam;
@@ -247,13 +236,9 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	public int getCurrentTick() {
 		return currentTick;
 	}
-
-	public Powerup<SpacePlayer> getRandomPowerup() {
-		return powerupsManager.getRandomPowerup();
-	}
 	
 	public void giveRandomPowerup(SpacePlayer player) {
-		givePowerup(player, getRandomPowerup());
+		givePowerup(player, powerupsManager.getRandomPowerup());
 	}
 	
 	public void givePowerup(SpacePlayer player, Powerup<SpacePlayer> powerup) {
@@ -354,14 +339,6 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 				player.setKit(kitsManager.getRandom());
 			}
 		});
-	}
-
-	private void changeGameModes() {
-		players.forEach(player -> player.setPlayingGameMode());
-	}
-
-	private void giveStartingItems() {
-		players.forEach(player -> player.giveDefaultItems());
 	}
 	
 	private void clearInventories() {

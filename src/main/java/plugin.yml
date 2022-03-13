@@ -3,7 +3,7 @@ main: it.tristana.spacewars.Main
 api-version: 1.18
 author: Massimiliano Micol
 depend: [TristanaCommons, NBTAPI]
-version: 1.0.13
+version: 1.0.19
 commands:
   spacewars:
     description: Main command (you can use /sw too)

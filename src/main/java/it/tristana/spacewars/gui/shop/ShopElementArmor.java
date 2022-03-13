@@ -29,7 +29,7 @@ public class ShopElementArmor extends ShopElement {
 
 	@Override
 	protected boolean run(SpacePlayer spacePlayer) {
-		
+		return false;
 	}
 
 	@Override
