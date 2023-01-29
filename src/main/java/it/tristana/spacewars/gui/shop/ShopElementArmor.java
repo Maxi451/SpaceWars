@@ -12,7 +12,7 @@ import it.tristana.spacewars.config.SettingsShop;
 
 public class ShopElementArmor extends ShopElement {
 
-	public ShopElementArmor(SettingsShop settings, ArenasManager<SpaceArena> arenasManager, String name, List<String> lore) {
+	public ShopElementArmor(SettingsShop settings, ArenasManager<SpaceArena, SpacePlayer> arenasManager, String name, List<String> lore) {
 		super(settings, arenasManager, name, lore);
 	}
 

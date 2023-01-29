@@ -13,9 +13,9 @@ import it.tristana.spacewars.arena.player.gun.Gun;
 
 public class ShotListener implements Listener {
 
-	private ArenasManager<SpaceArena> arenasManager;
+	private ArenasManager<SpaceArena, SpacePlayer> arenasManager;
 	
-	public ShotListener(ArenasManager<SpaceArena> arenasManager) {
+	public ShotListener(ArenasManager<SpaceArena, SpacePlayer> arenasManager) {
 		this.arenasManager = arenasManager;
 	}
 	

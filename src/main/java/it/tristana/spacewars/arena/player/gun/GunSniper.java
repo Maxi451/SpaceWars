@@ -1,5 +1,6 @@
 package it.tristana.spacewars.arena.player.gun;
 
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.inventory.ItemStack;
 
@@ -23,7 +24,7 @@ public class GunSniper extends Gun {
 
 	@Override
 	protected ItemStack forgeItem() {
-		return getDefaultItem();
+		return new ItemStack(Material.SPYGLASS);
 	}
 
 	@Override

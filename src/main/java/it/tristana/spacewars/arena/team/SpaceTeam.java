@@ -20,9 +20,9 @@ public class SpaceTeam extends BasicTeam<SpacePlayer, SpaceArena> implements Tic
 	private Nexus nexus;
 	private Color armorColor;
 	private ChatColor chatColor;
-	
+
 	public SpaceTeam(SpaceArena arena, Location spawnpoint, String name, String colorCode, Nexus nexus, Color armorColor) {
-		super(arena, spawnpoint, name, colorCode);
+		super(arena, spawnpoint, name, colorCode, armorColor);
 		this.nexus = nexus;
 		nexus.setTeam(this);
 		this.armorColor = armorColor;
@@ -33,11 +33,11 @@ public class SpaceTeam extends BasicTeam<SpacePlayer, SpaceArena> implements Tic
 	public void runTick() {
 		nexus.runTick();
 	}
-	
+
 	public Nexus getNexus() {
 		return nexus;
 	}
-	
+
 	public ItemStack[] getArmor() {
 		return new ItemStack[] {
 				createArmor(Material.LEATHER_BOOTS),
@@ -46,17 +46,21 @@ public class SpaceTeam extends BasicTeam<SpacePlayer, SpaceArena> implements Tic
 				createArmor(Material.LEATHER_HELMET)
 		};
 	}
-	
+
 	public TextComponent toColoredTextComponent(String message) {
 		TextComponent text = new TextComponent(message);
 		text.setColor(chatColor);
 		return text;
 	}
-	
+
 	public Color getArmorColor() {
 		return armorColor;
 	}
-	
+
+	public boolean hasPlayers() {
+		return !players.isEmpty();
+	}
+
 	private ItemStack createArmor(Material material) {
 		ItemStack item = new ItemStack(material);
 		ItemMeta meta = item.getItemMeta();

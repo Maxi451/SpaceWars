@@ -1,15 +1,17 @@
 package it.tristana.spacewars.config;
 
+import java.io.File;
+
 import it.tristana.commons.config.Settings;
 
 public class SettingsItems extends Settings<ConfigItems> {
 
-	public SettingsItems(ConfigItems config) {
-		super(config);
+	public SettingsItems(File folder) {
+		super(folder, ConfigItems.class);
 	}
 
 	@Override
-	public void reload() {
+	protected void reload(ConfigItems config) {
 		
 	}
 }

@@ -15,15 +15,15 @@ public class Nexus implements Tickable {
 
 	private static final int DISTANCE_PILLAR_NEXUS = 3;
 	private static final int DISTANCE_Y_PILLAR_NEXUS = -1;
-	
+
 	private SpaceTeam team;
 	private Location location;
 	private Pillar[] pillars;
 	private boolean isBroken;
-	
+
 	private Location centeredLocation;
 	private Location[] pillarsCenteredLocations;
-	
+
 	public Nexus(Location location) {
 		this.location = location;
 		centeredLocation = CommonsHelper.centerLocation(location).add(0, 0.5, 0);
@@ -41,16 +41,17 @@ public class Nexus implements Tickable {
 
 	@Override
 	public void runTick() {
-		if (isBroken) {
+		if (isBroken || !team.hasPlayers()) {
 			return;
 		}
+
 		for (int i = 0; i < pillars.length; i ++) {
 			if (pillars[i].isEnabled()) {
 				ParticlesHelper.particlesLine(centeredLocation, pillarsCenteredLocations[i], 0.1, Particle.FLAME);
 			}
 		}
 	}
-	
+
 	public void build() {
 		location.getBlock().setType(NEXUS_MATERIAL);
 		for (int i = 0; i < pillars.length; i ++) {
@@ -70,34 +71,47 @@ public class Nexus implements Tickable {
 		}
 		return false;
 	}
-	
+
 	public boolean breakNexus() {
+		if (isBroken) {
+			return false;
+		}
+
 		for (int i = 0; i < pillars.length; i ++) {
 			if (pillars[i].isEnabled()) {
 				return false;
 			}
 		}
-		location.getWorld().strikeLightningEffect(location);
+
 		isBroken = true;
 		return true;
+	}
+
+	public boolean isProtected() {
+		for (Pillar pillar : pillars) {
+			if (pillar.isEnabled()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public Location getLocation() {
 		return location;
 	}
-	
+
 	public boolean isBroken() {
 		return isBroken;
 	}
-	
+
 	public SpaceTeam getTeam() {
 		return team;
 	}
-	
+
 	void setTeam(SpaceTeam team) {
 		this.team = team;
 	}
-	
+
 	private Pillar buildPillar(int x, int z) {
 		return new Pillar(location.clone().add(x, DISTANCE_Y_PILLAR_NEXUS, z));
 	}

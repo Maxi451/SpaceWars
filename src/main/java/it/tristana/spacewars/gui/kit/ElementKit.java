@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 
 import it.tristana.commons.gui.BasicElement;
 import it.tristana.spacewars.arena.player.kit.Kit;
-import it.tristana.spacewars.event.KitChosenEvent;
+import it.tristana.spacewars.event.SpaceKitChosenEvent;
 
 public class ElementKit extends BasicElement {
 
@@ -19,7 +19,7 @@ public class ElementKit extends BasicElement {
 
 	@Override
 	public void onClick(Player player) {
-		Bukkit.getPluginManager().callEvent(new KitChosenEvent(player, kit));
+		Bukkit.getPluginManager().callEvent(new SpaceKitChosenEvent(player, kit));
 	}
 
 	@Override

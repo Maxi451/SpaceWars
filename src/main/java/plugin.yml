@@ -1,12 +1,13 @@
 name: SpaceWars
 main: it.tristana.spacewars.Main
-api-version: 1.18
+api-version: 1.19
 author: Massimiliano Micol
+softdepend: [PlaceholderAPI]
 depend: [TristanaCommons, NBTAPI]
-version: 1.0.19
+version: 1.1.0
 commands:
-  spacewars:
-    description: Main command (you can use /sw too)
-    aliases:
-    - sw
+  sw:
+    description: Main command
     usage: /sw help
+    permission: spacewars.player
+    default: true

@@ -1,15 +1,17 @@
 package it.tristana.spacewars.config;
 
+import java.io.File;
+
 import it.tristana.commons.config.Settings;
 
 public class SettingsShop extends Settings<ConfigShop> {
 
-	public SettingsShop(ConfigShop config) {
-		super(config);
+	public SettingsShop(File folder) {
+		super(folder, ConfigShop.class);
 	}
 
 	@Override
-	public void reload() {
+	protected void reload(ConfigShop config) {
 		
 	}
 }

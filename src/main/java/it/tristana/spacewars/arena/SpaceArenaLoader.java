@@ -16,11 +16,10 @@ import it.tristana.spacewars.Main;
 public class SpaceArenaLoader extends BasicArenaLoader<SpaceArena> {
 
 	private static final String NEXUSES = "nexuses";
-	private static final String CIRCLES = "circles";
-	private static final String ANGLE = "angle";
-	
+	private static final String SPHERES = "spheres";
+
 	private final Main plugin;
-	
+
 	public SpaceArenaLoader(File folder, Main plugin) {
 		super(new File(folder, "saved-maps.yml"));
 		this.plugin = plugin;
@@ -44,13 +43,10 @@ public class SpaceArenaLoader extends BasicArenaLoader<SpaceArena> {
 		for (int i = 0; i < size; i ++) {
 			setLocation(root + NEXUSES + "." + i, nexusLocations.get(i));
 		}
-		List<CirclePowerup> circles = arena.getCircles();
-		size = circles.size();
-		for (int i = 0; i < size; i ++) {
-			String path = root + CIRCLES + "." + i;
-			CirclePowerup powerup = circles.get(i);
-			setLocation(path, powerup.getLocation());
-			fileConfiguration.set(path + "." + ANGLE, powerup.getRotation());
+		int counter = 0;
+		for (SpherePowerup sphere : arena.getSpheres()) {
+			String path = root + SPHERES + "." + counter;
+			setLocation(path, sphere.getLocation());
 		}
 	}
 
@@ -80,11 +76,11 @@ public class SpaceArenaLoader extends BasicArenaLoader<SpaceArena> {
 				arena.setNexusLocation(getLocation(root + NEXUSES + "." + key, world));
 			});
 		}
-		section = fileConfiguration.getConfigurationSection(root + CIRCLES);
+		section = fileConfiguration.getConfigurationSection(root + SPHERES);
 		if (section != null) {
 			new TreeSet<>(section.getKeys(false)).forEach(key -> {
-				String path = root + CIRCLES + "." + key;
-				arena.setCirclePowerup(getLocation(path, world), Double.parseDouble(fileConfiguration.getString(path + "." + ANGLE)));
+				String path = root + SPHERES + "." + key;
+				arena.setSpherePowerup(getLocation(path, world));
 			});
 		}
 		return arena;

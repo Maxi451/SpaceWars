@@ -10,12 +10,15 @@ import it.tristana.spacewars.database.SpaceUser;
 
 public class SpaceLoginAction extends LoginAction<SpaceUser> {
 
-	public SpaceLoginAction(Main plugin) {
+	private PlayersManager playersManager;
+	
+	public SpaceLoginAction(Main plugin, PlayersManager playersManager) {
 		super(plugin, plugin.getArenasManager(), plugin::getMainLobby);
+		this.playersManager = playersManager;
 	}
 
 	@Override
-	protected PlayersManager getPlayersManager(Plugin plugin, ArenasManager<?> arenasManager) {
-		return new SpacePlayersManager(plugin, arenasManager);
+	protected PlayersManager getPlayersManager(Plugin plugin, ArenasManager<?, ?> arenasManager) {
+		return playersManager;
 	}
 }

@@ -32,7 +32,7 @@ public class CommandCreate extends SpaceSubCommand {
 			CommonsHelper.info(sender, CommonsHelper.replaceAll(settings.getOtherArenaHere(), "{arena}", otherArena.getName()));
 			return;
 		}
-		arenasManager.addArena(new SpaceArena(world, name, plugin));
+		arenasManager.addArena(new SpaceArena(world, args[1], plugin));
 		CommonsHelper.info(sender, settings.getCreateExecuted());
 	}
 

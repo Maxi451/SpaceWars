@@ -2,6 +2,7 @@ package it.tristana.spacewars.command;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.util.StringUtil;
@@ -30,7 +31,7 @@ public class CommandDelete extends SpaceSubCommand {
 
 	@Override
 	protected List<String> onTab(CommandSender sender, String[] args) {
-		List<String> names = arenasManager.getArenas().stream().map(arena -> arena.getName()).toList();
+		List<String> names = arenasManager.getArenas().stream().map(arena -> arena.getName()).collect(Collectors.toList());
 		if (args.length < 2) {
 			return names;
 		}

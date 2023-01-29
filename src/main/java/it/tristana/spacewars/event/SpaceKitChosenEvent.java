@@ -6,13 +6,13 @@ import org.bukkit.event.player.PlayerEvent;
 
 import it.tristana.spacewars.arena.player.kit.Kit;
 
-public class KitChosenEvent extends PlayerEvent {
+public class SpaceKitChosenEvent extends PlayerEvent {
 	
     private static final HandlerList handlers = new HandlerList();
 
     private Kit kit;
     
-	public KitChosenEvent(Player player, Kit kit) {
+	public SpaceKitChosenEvent(Player player, Kit kit) {
 		super(player);
 		this.kit = kit;
 	}

@@ -5,19 +5,18 @@ import java.sql.SQLException;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.command.PluginCommand;
+import org.bukkit.plugin.PluginManager;
 
 import it.tristana.commons.arena.BasicArenasManager;
-import it.tristana.commons.config.ConfigDefaultCommands;
-import it.tristana.commons.config.ConfigTeams;
-import it.tristana.commons.config.SettingsDefaultCommands;
 import it.tristana.commons.config.SettingsTeams;
 import it.tristana.commons.database.BasicUsersManager;
 import it.tristana.commons.database.DatabaseManager;
 import it.tristana.commons.helper.BasicPartiesManager;
 import it.tristana.commons.helper.CommonsHelper;
+import it.tristana.commons.helper.PlayersManager;
 import it.tristana.commons.helper.PluginDraft;
 import it.tristana.commons.interfaces.DatabaseHolder;
+import it.tristana.commons.interfaces.MainLobbyHolder;
 import it.tristana.commons.interfaces.PartiesHolder;
 import it.tristana.commons.interfaces.Reloadable;
 import it.tristana.commons.interfaces.arena.ArenaLoader;
@@ -30,62 +29,68 @@ import it.tristana.commons.interfaces.gui.ClickedGuiManager;
 import it.tristana.commons.listener.ChatListener;
 import it.tristana.commons.listener.GuiListener;
 import it.tristana.commons.listener.LoginQuitListener;
+import it.tristana.commons.listener.VillagerShopListener;
 import it.tristana.spacewars.arena.SpaceArena;
 import it.tristana.spacewars.arena.SpaceArenaLoader;
+import it.tristana.spacewars.arena.player.SpacePlayer;
 import it.tristana.spacewars.arena.player.kit.KitsManager;
 import it.tristana.spacewars.chat.SpaceChatManager;
 import it.tristana.spacewars.command.SpaceCommand;
-import it.tristana.spacewars.config.ConfigArena;
 import it.tristana.spacewars.config.ConfigCommands;
-import it.tristana.spacewars.config.ConfigKits;
-import it.tristana.spacewars.config.ConfigMessages;
-import it.tristana.spacewars.config.ConfigPowerups;
 import it.tristana.spacewars.config.ConfigSpaceDatabase;
 import it.tristana.spacewars.config.SettingsArena;
 import it.tristana.spacewars.config.SettingsCommands;
 import it.tristana.spacewars.config.SettingsKits;
 import it.tristana.spacewars.config.SettingsMessages;
 import it.tristana.spacewars.config.SettingsPowerups;
+import it.tristana.spacewars.config.SettingsSpaceScoreboard;
 import it.tristana.spacewars.database.SpaceDatabase;
 import it.tristana.spacewars.database.SpaceUser;
 import it.tristana.spacewars.gui.SpaceClickedGuiManager;
 import it.tristana.spacewars.gui.kit.GuiKit;
+import it.tristana.spacewars.gui.shop.GuiShop;
+import it.tristana.spacewars.helper.PapiManager;
 import it.tristana.spacewars.helper.SpaceLoginAction;
+import it.tristana.spacewars.helper.SpacePlayersManager;
 import it.tristana.spacewars.helper.SpaceQuitAction;
 import it.tristana.spacewars.listener.BlockListener;
 import it.tristana.spacewars.listener.PlayerDamageListener;
 import it.tristana.spacewars.listener.PlayerDeathListener;
 import it.tristana.spacewars.listener.RemovedEventsListener;
 import it.tristana.spacewars.listener.ShotListener;
+import it.tristana.spacewars.listener.SpaceEventsListener;
 
-public class Main extends PluginDraft implements Reloadable, DatabaseHolder, PartiesHolder {
-	
+public final class Main extends PluginDraft implements Reloadable, DatabaseHolder, PartiesHolder, MainLobbyHolder {
+
 	public static final String ADMIN_PERMS = "spacewars.admin";
-	
-	private static final String COMMAND = "spacewars";
-	
+
+	private static final String COMMAND = "sw";
+
 	private File folder;
 	private boolean isDisabled;
 
-	private SettingsDefaultCommands settingsDefaultCommands;
 	private SettingsKits settingsKits;
 	private SettingsCommands settingsCommands;
 	private SettingsPowerups settingsPowerups;
 	private SettingsMessages settingsMessages;
 	private SettingsTeams settingsTeams;
 	private SettingsArena settingsArena;
-	
+	private SettingsSpaceScoreboard settingsScoreboard;
+
 	private DatabaseManager<SpaceUser> database;
 	private UsersManager<SpaceUser> usersManager;
 	private ChatManager chatManager;
 	private ClickedGuiManager clickedGuiManager;
-	private ArenasManager<SpaceArena> arenasManager;
+	private ArenasManager<SpaceArena, SpacePlayer> arenasManager;
 	private ArenaLoader<SpaceArena> arenaLoader;
+	private PlayersManager playersManager;
 	private PartiesManager partiesManager;
 	private KitsManager kitsManager;
-	
+
 	private Location mainLobby;
-	
+
+	private boolean isPapiEnabled;
+
 	@Override
 	public void onEnable() {
 		folder = getFolder();
@@ -96,26 +101,27 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 			selfDestroy(e, "&cCould not open the database connection. Did you configure the credentials? Check the errors file");
 			return;
 		}
+
 		createSettings();
+		checkDependencies();
 		try {
 			loadManagers();
 		} catch (Exception e) {
 			selfDestroy(e, "&cAn internal error occurred loading SpaceWars. This is a programming error! Please report the stacktrace found in your errors file");
 			return;
 		}
+
 		registerListeners();
 		loadArenas();
-		PluginCommand cmd = Bukkit.getPluginCommand(COMMAND);
-		SpaceCommand spaceCommand = new SpaceCommand(this, settingsDefaultCommands, "sw", settingsCommands);
-		cmd.setTabCompleter(spaceCommand);
-		cmd.setExecutor(spaceCommand);
+		registerCommand(this, SpaceCommand.class, COMMAND, ConfigCommands.FILE_NAME);
 	}
-	
+
 	@Override
 	public void onDisable() {
 		if (isDisabled) {
 			return;
 		}
+
 		closeArenas();
 		saveArenas();
 		try {
@@ -125,48 +131,66 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 			writeThrowableOnErrorsFile(e);
 		}
 	}
-	
+
 	@Override
 	public Database getStorage() {
 		return database;
 	}
-	
+
 	@Override
 	public void reload() {
-		settingsDefaultCommands.setConfig(new ConfigDefaultCommands());
-		settingsKits.setConfig(new ConfigKits(folder));
-		settingsCommands.setConfig(new ConfigCommands(folder));
-		settingsPowerups.setConfig(new ConfigPowerups(folder));
-		settingsMessages.setConfig(new ConfigMessages(folder));
-		settingsTeams.setConfig(new ConfigTeams(folder));
-		settingsArena.setConfig(new ConfigArena(folder));
+		settingsKits.reload();
+		settingsCommands.reload();
+		settingsPowerups.reload();
+		settingsMessages.reload();
+		settingsTeams.reload();
+		settingsArena.reload();
+		settingsScoreboard.reload();
 		clickedGuiManager.clearGuis();
 		registerGuis();
 	}
-	
+
 	@Override
 	public PartiesManager getPartiesManager() {
 		return partiesManager;
 	}
-	
-	public ArenasManager<SpaceArena> getArenasManager() {
+
+	@Override
+	public Location getMainLobby() {
+		return mainLobby == null ? null : mainLobby.clone();
+	}
+
+	@Override
+	public void setMainLobby(Location mainLobby) {
+		this.mainLobby = mainLobby;
+	}
+
+	public ArenasManager<SpaceArena, SpacePlayer> getArenasManager() {
 		return arenasManager;
 	}
-	
+
 	public SettingsKits getSettingsKits() {
 		return settingsKits;
 	}
-	
+
 	public SettingsPowerups getSettingsPowerups() {
 		return settingsPowerups;
 	}
-	
+
 	public SettingsMessages getSettingsMessages() {
 		return settingsMessages;
 	}
-	
+
 	public SettingsTeams getSettingsTeams() {
 		return settingsTeams;
+	}
+
+	public SettingsCommands getSettingsCommands() {
+		return settingsCommands;
+	}
+
+	public SettingsSpaceScoreboard getSettingsScoreboard() {
+		return settingsScoreboard;
 	}
 
 	public UsersManager<SpaceUser> getUsersManager() {
@@ -181,25 +205,30 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 		return kitsManager;
 	}
 
-	public Location getMainLobby() {
-		return mainLobby == null ? null : mainLobby.clone();
+	public PlayersManager getPlayersManager() {
+		return playersManager;
 	}
-	
-	public void setMainLobby(Location mainLobby) {
-		this.mainLobby = mainLobby;
+
+	public boolean isPapiEnabled() {
+		return isPapiEnabled;
 	}
-	
+
+	private void checkDependencies() {
+		PluginManager pluginManager = Bukkit.getPluginManager();
+		isPapiEnabled = pluginManager.getPlugin("PlaceholderAPI") != null;
+	}
+
 	private void registerGuis() {
 		clickedGuiManager.registerGui(new GuiKit(CommonsHelper.toChatColors("&6&lKits"), kitsManager));
 	}
-	
+
 	private void selfDestroy(Throwable t, String message) {
 		CommonsHelper.consoleInfo(message);
 		writeThrowableOnErrorsFile(t);
 		isDisabled = true;
 		Bukkit.getPluginManager().disablePlugin(this);
 	}
-	
+
 	private void closeArenas() {
 		for (SpaceArena arena : arenasManager.getArenas()) {
 			try {
@@ -209,46 +238,50 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 			}
 		}
 	}
-	
+
 	private void saveArenas() {
 		if (mainLobby != null) {
 			arenaLoader.saveMainLobby(mainLobby);
 			arenaLoader.saveArenas(arenasManager.getArenas());
 		}
 	}
-	
+
 	private void loadArenas() {
 		arenaLoader = new SpaceArenaLoader(folder, this);
 		mainLobby = arenaLoader.getMainLobby();
 		if (mainLobby != null) {
 			arenaLoader.loadArenas().forEach(arena -> arenasManager.addArena(arena));
 		}
-		arenasManager.startClock(this, 20);
+		arenasManager.startClock(this, 4);
 	}
-	
+
 	private void createSettings() {
-		settingsDefaultCommands = new SettingsDefaultCommands(new ConfigDefaultCommands());
-		settingsKits = new SettingsKits(new ConfigKits(folder));
-		settingsCommands = new SettingsCommands(new ConfigCommands(folder));
-		settingsPowerups = new SettingsPowerups(new ConfigPowerups(folder));
-		settingsMessages = new SettingsMessages(new ConfigMessages(folder));
-		settingsTeams = new SettingsTeams(new ConfigTeams(folder));
-		settingsArena = new SettingsArena(new ConfigArena(folder));
+		settingsKits = new SettingsKits(folder);
+		settingsCommands = new SettingsCommands(folder);
+		settingsPowerups = new SettingsPowerups(folder);
+		settingsMessages = new SettingsMessages(folder);
+		settingsTeams = new SettingsTeams(folder);
+		settingsArena = new SettingsArena(folder);
+		settingsScoreboard = new SettingsSpaceScoreboard(folder);
 	}
-	
+
 	private void loadManagers() throws NoSuchMethodException {
 		arenasManager = new BasicArenasManager<>();
+		playersManager = new SpacePlayersManager(this, arenasManager);
 		usersManager = new BasicUsersManager<>(database);
 		chatManager = new SpaceChatManager();
 		clickedGuiManager = new SpaceClickedGuiManager();
 		partiesManager = new BasicPartiesManager();
 		kitsManager = new KitsManager(this, settingsKits);
 		kitsManager.loadDefaultKits();
+		if (isPapiEnabled) {
+			new PapiManager(this, usersManager).register();
+		}
 		registerGuis();
 	}
-	
+
 	private void registerListeners() {
-		register(new LoginQuitListener<>(usersManager, database, new SpaceLoginAction(this), new SpaceQuitAction(this)));
+		register(new LoginQuitListener<>(usersManager, database, this, new SpaceLoginAction(this, playersManager), new SpaceQuitAction(this, playersManager)));
 		register(new ChatListener(chatManager));
 		register(new GuiListener(clickedGuiManager));
 		register(new ShotListener(arenasManager));
@@ -256,8 +289,10 @@ public class Main extends PluginDraft implements Reloadable, DatabaseHolder, Par
 		register(new BlockListener(arenasManager));
 		register(new PlayerDamageListener(arenasManager, settingsArena));
 		register(new RemovedEventsListener());
+		register(new VillagerShopListener<>(arenasManager, clickedGuiManager, GuiShop.class));
+		register(new SpaceEventsListener(arenasManager, settingsMessages));
 	}
-	
+
 	private SpaceDatabase getDatabase() {
 		ConfigSpaceDatabase config = new ConfigSpaceDatabase(folder);
 		String host = config.getString(ConfigSpaceDatabase.HOST);

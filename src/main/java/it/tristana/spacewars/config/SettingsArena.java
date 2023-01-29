@@ -1,5 +1,7 @@
 package it.tristana.spacewars.config;
 
+import java.io.File;
+
 import it.tristana.commons.config.Settings;
 import it.tristana.commons.helper.CommonsHelper;
 
@@ -7,12 +9,12 @@ public class SettingsArena extends Settings<ConfigArena> {
 
 	private double flyIntoWallDamageReductionPercentage;
 	
-	public SettingsArena(ConfigArena config) {
-		super(config);
+	public SettingsArena(File folder) {
+		super(folder, ConfigArena.class);
 	}
 
 	@Override
-	public void reload() {
+	protected void reload(ConfigArena config) {
 		flyIntoWallDamageReductionPercentage = CommonsHelper.parseDoubleOrGetDefault(config.getString(ConfigArena.FLY_INTO_WALL_DAMAGE_REDUCTION_PERCENTAGE), 50) / 100;
 	}
 

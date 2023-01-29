@@ -13,10 +13,13 @@ import it.tristana.spacewars.database.SpaceUser;
 
 public class SpaceQuitAction extends QuitAction<SpaceUser> {
 
-	public SpaceQuitAction(Main plugin) {
+	private PlayersManager playersManager;
+
+	public SpaceQuitAction(Main plugin, PlayersManager playersManager) {
 		super(plugin, plugin.getArenasManager(), plugin::getMainLobby);
+		this.playersManager = playersManager;
 	}
-	
+
 	@Override
 	public void accept(PlayerQuitEvent event, SpaceUser user) {
 		Player player = event.getPlayer();
@@ -28,7 +31,7 @@ public class SpaceQuitAction extends QuitAction<SpaceUser> {
 	}
 
 	@Override
-	protected PlayersManager getPlayersManager(Plugin plugin, ArenasManager<?> arenasManager) {
-		return new SpacePlayersManager(plugin, arenasManager);
+	protected PlayersManager getPlayersManager(Plugin plugin, ArenasManager<?, ?> arenasManager) {
+		return playersManager;
 	}
 }

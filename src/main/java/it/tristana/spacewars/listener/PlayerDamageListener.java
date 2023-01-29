@@ -10,14 +10,15 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import it.tristana.commons.interfaces.arena.ArenasManager;
 import it.tristana.commons.interfaces.arena.Status;
 import it.tristana.spacewars.arena.SpaceArena;
+import it.tristana.spacewars.arena.player.SpacePlayer;
 import it.tristana.spacewars.config.SettingsArena;
 
 public class PlayerDamageListener implements Listener {
 
-	private ArenasManager<SpaceArena> arenasManager;
+	private ArenasManager<SpaceArena, SpacePlayer> arenasManager;
 	private SettingsArena settings;
 
-	public PlayerDamageListener(ArenasManager<SpaceArena> arenasManager, SettingsArena settings) {
+	public PlayerDamageListener(ArenasManager<SpaceArena, SpacePlayer> arenasManager, SettingsArena settings) {
 		this.arenasManager = arenasManager;
 		this.settings = settings;
 	}

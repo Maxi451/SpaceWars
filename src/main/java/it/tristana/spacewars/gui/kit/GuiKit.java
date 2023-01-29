@@ -17,7 +17,7 @@ public class GuiKit extends BasicGui {
 	}
 
 	@Override
-	protected Element[] getElements(Player player) {
+	public Element[] getElements(Player player) {
 		Kit[] kits = kitsManager.getKitsView();
 		Element[] elements = new Element[kits.length];
 		for (int i = 0; i < elements.length; i ++) {

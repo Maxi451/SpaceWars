@@ -1,5 +1,6 @@
 package it.tristana.spacewars.config;
 
+import java.io.File;
 import java.util.List;
 
 import it.tristana.commons.config.Settings;
@@ -44,12 +45,12 @@ public class SettingsKits extends Settings<ConfigKits> {
 	private double defenderBonusReloadPercentage;
 	private double defenderMaxNexusDistance;
 	
-	public SettingsKits(ConfigKits config) {
-		super(config);
+	public SettingsKits(File folder) {
+		super(folder, ConfigKits.class);
 	}
 	
 	@Override
-	public void reload() {
+	protected void reload(ConfigKits config) {
 		minerName = config.getString(ConfigKits.MINER_NAME);
 		minerLore = config.getList(ConfigKits.MINER_LORE);
 		minerArmor = CommonsHelper.parseDoubleOrGetDefault(config.getString(ConfigKits.MINER_ARMOR), 33);

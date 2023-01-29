@@ -14,7 +14,8 @@ public class ConfigMessages extends Config {
 	public static final String NEXUS_DESTROYED = "nexus-destroyed";
 	public static final String MONEY_GAINED = "money-gained";
 	public static final String PLAYER_GOT_POWERUP = "player-got-powerup";
-	
+	public static final String KIT_CHOSEN = "kit-chosen";
+
 	public ConfigMessages(File folder) {
 		super(new File(folder, "messages.yml"));
 	}
@@ -29,5 +30,6 @@ public class ConfigMessages extends Config {
 		set(NEXUS_DESTROYED, "{team color}{team}&f's nexus has been &cdestroyed &fby {player color}{player}&f!");
 		set(MONEY_GAINED, "You gained &6{money} &fmoney");
 		set(PLAYER_GOT_POWERUP, "{player color}{player} picked up &6{powerup}");
+		set(KIT_CHOSEN, "You have chosen the kit {kit}&r! Use '&b/sw kit&r' to change it again");
 	}
 }

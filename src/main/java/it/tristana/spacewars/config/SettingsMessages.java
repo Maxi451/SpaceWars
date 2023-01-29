@@ -1,5 +1,7 @@
 package it.tristana.spacewars.config;
 
+import java.io.File;
+
 import it.tristana.commons.config.Settings;
 
 public class SettingsMessages extends Settings<ConfigMessages> {
@@ -12,13 +14,14 @@ public class SettingsMessages extends Settings<ConfigMessages> {
 	private String nexusDestroyed;
 	private String moneyGained;
 	private String playerGotPowerup;
-	
-	public SettingsMessages(ConfigMessages config) {
-		super(config);
+	private String kitChosen;
+
+	public SettingsMessages(File folder) {
+		super(folder, ConfigMessages.class);
 	}
 
 	@Override
-	public void reload() {
+	protected void reload(ConfigMessages config) {
 		playerKilled = config.getString(ConfigMessages.PLAYER_KILLED);
 		playerKilledSelf = config.getString(ConfigMessages.PLAYER_KILLED_SELF);
 		playerEliminated = config.getString(ConfigMessages.PLAYER_ELIMINATED);
@@ -27,6 +30,7 @@ public class SettingsMessages extends Settings<ConfigMessages> {
 		nexusDestroyed = config.getString(ConfigMessages.NEXUS_DESTROYED);
 		moneyGained = config.getString(ConfigMessages.MONEY_GAINED);
 		playerGotPowerup = config.getString(ConfigMessages.PLAYER_GOT_POWERUP);
+		kitChosen = config.getString(ConfigMessages.KIT_CHOSEN);
 	}
 
 	public String getPlayerGotPowerup() {
@@ -59,5 +63,9 @@ public class SettingsMessages extends Settings<ConfigMessages> {
 
 	public String getMoneyGained() {
 		return moneyGained;
+	}
+
+	public String getKitChosen() {
+		return kitChosen;
 	}
 }

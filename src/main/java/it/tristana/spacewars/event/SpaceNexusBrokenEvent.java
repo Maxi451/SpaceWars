@@ -4,15 +4,16 @@ import org.bukkit.event.HandlerList;
 
 import it.tristana.spacewars.arena.player.SpacePlayer;
 import it.tristana.spacewars.arena.team.Nexus;
-import it.tristana.spacewars.arena.team.Pillar;
 
-public class PillarBrokenEvent extends NexusBrokenEvent {
-
-	private Pillar pillar;
+public class SpaceNexusBrokenEvent extends SpacePlayerEvent {
 	
-	public PillarBrokenEvent(SpacePlayer player, Nexus nexus, Pillar pillar) {
-		super(player, nexus);
-		this.pillar = pillar;
+    protected static final HandlerList handlers = new HandlerList();
+    
+    private Nexus nexus;
+
+	public SpaceNexusBrokenEvent(SpacePlayer player, Nexus nexus) {
+		super(player);
+		this.nexus = nexus;
 	}
 
     @Override
@@ -20,9 +21,9 @@ public class PillarBrokenEvent extends NexusBrokenEvent {
         return handlers;
     }
 
-	public Pillar getPillar() {
-		return pillar;
-	}
+    public Nexus getNexus() {
+    	return nexus;
+    }
     
     public static HandlerList getHandlerList() {
         return handlers;

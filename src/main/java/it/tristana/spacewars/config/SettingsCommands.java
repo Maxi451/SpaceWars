@@ -1,5 +1,7 @@
 package it.tristana.spacewars.config;
 
+import java.io.File;
+
 import it.tristana.commons.config.Settings;
 
 public class SettingsCommands extends Settings<ConfigCommands> {
@@ -9,6 +11,7 @@ public class SettingsCommands extends Settings<ConfigCommands> {
 	private String noArenaMatching;
 	private String noArenaInWorld;
 	private String inputNotDouble;
+	private String notInArena;
 
 	private String mainLobbyHelp;
 	private String mainLobbyExecuted;
@@ -19,7 +22,7 @@ public class SettingsCommands extends Settings<ConfigCommands> {
 
 	private String deleteHelp;
 	private String deleteExecuted;
-	
+
 	private String lobbyHelp;
 	private String lobbyExecuted;
 
@@ -30,24 +33,31 @@ public class SettingsCommands extends Settings<ConfigCommands> {
 	private String nexusHelp;
 	private String nexusExecuted;
 	private String nexusCantSetAnother;
-	
+
 	private String joinHelp;
 	private String noJoinableArenaFound;
+
+	private String sphereHelp;
+	private String sphereExecuted;
+
+	private String leaveHelp;
+	private String leaveExecuted;
 	
-	private String circleHelp;
-	private String circleExecuted;
-	
-	public SettingsCommands(ConfigCommands config) {
-		super(config);
+	private String kitHelp;
+	private String cantChooseKitNow;
+
+	public SettingsCommands(File folder) {
+		super(folder, ConfigCommands.class);
 	}
 
 	@Override
-	public void reload() {
+	protected void reload(ConfigCommands config) {
 		otherArenaHere = config.getString(ConfigCommands.OTHER_ARENA_HERE);
 		mainLobbyNotSet = config.getString(ConfigCommands.MAIN_LOBBY_NOT_SET);
 		noArenaMatching = config.getString(ConfigCommands.NO_ARENA_MATCHING);
 		noArenaInWorld = config.getString(ConfigCommands.NO_ARENA_IN_WORLD);
 		inputNotDouble = config.getString(ConfigCommands.INPUT_NOT_DOUBLE);
+		notInArena = config.getString(ConfigCommands.NOT_IN_ARENA);
 
 		mainLobbyHelp = config.getString(ConfigCommands.MAIN_LOBBY_HELP);
 		mainLobbyExecuted = config.getString(ConfigCommands.MAIN_LOBBY_EXECUTED);
@@ -73,20 +83,46 @@ public class SettingsCommands extends Settings<ConfigCommands> {
 		joinHelp = config.getString(ConfigCommands.JOIN_HELP);
 		noJoinableArenaFound = config.getString(ConfigCommands.JOIN_NO_JOINABLE_ARENA_FOUND);
 
-		circleHelp = config.getString(ConfigCommands.CIRCLE_HELP);
-		circleExecuted = config.getString(ConfigCommands.CIRCLE_EXECUTED);
+		sphereHelp = config.getString(ConfigCommands.SPHERE_HELP);
+		sphereExecuted = config.getString(ConfigCommands.SPHERE_EXECUTED);
+
+		leaveHelp = config.getString(ConfigCommands.LEAVE_HELP);
+		leaveExecuted = config.getString(ConfigCommands.LEAVE_EXECUTED);
+
+		kitHelp = config.getString(ConfigCommands.KIT_HELP);
+		cantChooseKitNow = config.getString(ConfigCommands.CANT_CHOOSE_KIT_NOW);
+	}
+
+	public String getKitHelp() {
+		return kitHelp;
+	}
+
+	public String getCantChooseKitNow() {
+		return cantChooseKitNow;
+	}
+
+	public String getNotInArena() {
+		return notInArena;
+	}
+
+	public String getLeaveHelp() {
+		return leaveHelp;
+	}
+
+	public String getLeaveExecuted() {
+		return leaveExecuted;
 	}
 
 	public String getInputNotDouble() {
 		return inputNotDouble;
 	}
 
-	public String getCircleHelp() {
-		return circleHelp;
+	public String getSphereHelp() {
+		return sphereHelp;
 	}
 
-	public String getCircleExecuted() {
-		return circleExecuted;
+	public String getSphereExecuted() {
+		return sphereExecuted;
 	}
 
 	public String getJoinHelp() {

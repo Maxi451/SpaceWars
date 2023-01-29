@@ -20,21 +20,21 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	private static final int TICKS_FOR_FUEL = 8;
 	private static final int TICKS_FOR_RESPAWN = 5;
 	private static final int STARTING_LIVES = 5;
-	
+
 	private SpaceUser user;
 	private Kit kit;
 	private double bonusArmor;
 	private double bonusDamage;
-	
+
 	private SpacePlayer lastAttacker;
-	
+
 	private double money;
 	private int ticksForFuel;
 	private int ticksToRespawn;
 	private int lives;
-	
+
 	public SpacePlayer(SpaceArena arena, SpaceUser user) {
-		super(arena, user.getPlayer());
+		super(arena, user.getPlayer().getPlayer());
 		this.user = user;
 		lives = STARTING_LIVES;
 		ticksForFuel = TICKS_FOR_FUEL;
@@ -52,18 +52,18 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		}
 		checkFuel();
 	}
-	
+
 	@Override
 	public void giveMoney(double money) {
 		this.money += money;
 		player.setLevel((int) this.money);
 	}
-	
+
 	@Override
 	public double getMoney() {
 		return money;
 	}
-	
+
 	@Override
 	public boolean tryToPay(double money) {
 		boolean flag = this.money >= money;
@@ -72,7 +72,7 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		}
 		return flag;
 	}
-	
+
 	public void onDeath() {
 		lives --;
 		lastAttacker = null;
@@ -84,69 +84,69 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 			player.getInventory().clear();
 		}
 	}
-	
+
 	public void giveDefaultItems() {
 		PlayerInventory inventory = player.getInventory();
 		inventory.setArmorContents(team.getArmor());
 		kit.giveItems(inventory);
 	}
-	
+
 	public int getLives() {
 		return lives;
 	}
-	
+
 	public void onLife() {
 		lives ++;
 	}
-	
+
 	public SpaceUser getUser() {
 		return user;
 	}
-	
+
 	public void setKit(Kit kit) {
 		this.kit = kit;
 	}
-	
+
 	public Kit getKit() {
 		return kit;
 	}
-	
+
 	public void addBonusArmor(double bonusArmor) {
-		this.bonusArmor = bonusArmor;
+		this.bonusArmor += bonusArmor;
 	}
-	
+
 	public double getBonusArmor() {
 		return bonusArmor;
 	}
-	
+
 	public double getTotalArmor() {
 		return kit.getArmor(this) + bonusArmor;
 	}
-	
+
 	public void addBonusDamage(double bonusDamage) {
-		this.bonusDamage = bonusDamage;
+		this.bonusDamage += bonusDamage;
 	}
-	
+
 	public double getBonusDamage() {
 		return bonusDamage;
 	}
-	
+
 	public double getTotalDamage() {
 		return kit.getGun().getDamage(this) + bonusDamage;
 	}
-	
+
 	public void setLastAttacker(SpacePlayer lastAttacker) {
 		this.lastAttacker = lastAttacker;
 	}
-	
+
 	public SpacePlayer getLastAttacker() {
 		return lastAttacker;
 	}
-	
+
 	public void setPlayingGameMode() {
 		player.setGameMode(GameMode.ADVENTURE);
 	}
-	
+
 	public void upgradePickaxe() {
 		kit.upgradePickaxe();
 		int slot = getPickaxeSlot();
@@ -154,12 +154,12 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 			player.getInventory().setItem(slot, kit.getPickaxe());
 		}
 	}
-	
+
 	public void giveFuel(int amount) {
-		player.getInventory().addItem(new ItemStack(Material.FIREWORK_ROCKET));
+		player.getInventory().addItem(new ItemStack(Material.FIREWORK_ROCKET, amount));
 		onRefuel();
 	}
-	
+
 	private int getPickaxeSlot() {
 		ItemStack[] items = player.getInventory().getContents();
 		for (int i = 0; i < items.length; i ++) {
@@ -169,25 +169,26 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		}
 		return -1;
 	}
-	
+
 	private void giveTickMoney() {
 		giveMoney(Math.pow(arena.getCurrentTick(), 0.25));
 	}
-	
+
 	private void respawn() {
 		setPlayingGameMode();
 		giveDefaultItems();
+		player.teleport(team.getSpawnpoint());
 	}
-	
+
 	private void checkFuel() {
 		if (hasFuel()) {
 			onRefuel();
 		} else if (-- ticksForFuel <= 0) {
 			giveFuel(1);
 		}
-		user.getPlayer().setExp(1 - (float) ticksForFuel / TICKS_FOR_FUEL);
+		user.getPlayer().getPlayer().setExp(1 - (float) ticksForFuel / TICKS_FOR_FUEL);
 	}
-	
+
 	private boolean hasFuel() {
 		Inventory inventory = player.getInventory();
 		int size = inventory.getSize();
@@ -199,7 +200,7 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		}
 		return false;
 	}
-	
+
 	private void onRefuel() {
 		ticksForFuel = TICKS_FOR_FUEL;
 	}

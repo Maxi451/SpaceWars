@@ -32,6 +32,6 @@ public class ItemsManager extends RegisterManager<SpaceItem> {
 
 	@Override
 	protected Class<?>[] getConstructorParameters() {
-		return new Class[] {SettingsShop.class};
+		return new Class[] { SettingsShop.class };
 	}
 }

@@ -8,12 +8,13 @@ import org.bukkit.event.entity.EntityDamageEvent;
 
 import it.tristana.commons.interfaces.arena.ArenasManager;
 import it.tristana.spacewars.arena.SpaceArena;
+import it.tristana.spacewars.arena.player.SpacePlayer;
 
 public class PlayerDeathListener implements Listener {
 
-	private ArenasManager<SpaceArena> arenasManager;
+	private ArenasManager<SpaceArena, SpacePlayer> arenasManager;
 	
-	public PlayerDeathListener(ArenasManager<SpaceArena> arenasManager) {
+	public PlayerDeathListener(ArenasManager<SpaceArena, SpacePlayer> arenasManager) {
 		this.arenasManager = arenasManager;
 	}
 	

@@ -14,9 +14,9 @@ import it.tristana.spacewars.config.SettingsShop;
 public abstract class ShopElement extends BasicElement implements ShopItem<SpacePlayer> {
 
 	protected final SettingsShop settings;
-	protected final ArenasManager<SpaceArena> arenasManager;
+	protected final ArenasManager<SpaceArena, SpacePlayer> arenasManager;
 	
-	public ShopElement(SettingsShop settings, ArenasManager<SpaceArena> arenasManager, String name, List<String> lore) {
+	public ShopElement(SettingsShop settings, ArenasManager<SpaceArena, SpacePlayer> arenasManager, String name, List<String> lore) {
 		super(name, lore);
 		this.settings = settings;
 		this.arenasManager = arenasManager;

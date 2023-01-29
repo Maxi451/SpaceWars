@@ -16,7 +16,7 @@ public class GuiShop extends BasicGui {
 	}
 
 	@Override
-	protected Element[] getElements(Player player) {
+	public Element[] getElements(Player player) {
 		return null;
 	}
 }

@@ -11,7 +11,7 @@ public class SpacePlayersManager extends PlayersManager {
 
 	private Plugin plugin;
 
-	public SpacePlayersManager(Plugin plugin, ArenasManager<?> arenasManager) {
+	public SpacePlayersManager(Plugin plugin, ArenasManager<?, ?> arenasManager) {
 		super(arenasManager);
 		this.plugin = plugin;
 	}

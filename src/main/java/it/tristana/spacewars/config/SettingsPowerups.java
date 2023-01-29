@@ -1,5 +1,7 @@
 package it.tristana.spacewars.config;
 
+import java.io.File;
+
 import it.tristana.commons.config.Settings;
 import it.tristana.commons.helper.CommonsHelper;
 
@@ -28,12 +30,12 @@ public class SettingsPowerups extends Settings<ConfigPowerups> {
 	private String betterPickaxesName;
 	private int betterPickaxesChance;
 	
-	public SettingsPowerups(ConfigPowerups config) {
-		super(config);
+	public SettingsPowerups(File folder) {
+		super(folder, ConfigPowerups.class);
 	}
 
 	@Override
-	public void reload() {
+	protected void reload(ConfigPowerups config) {
 		_1upName = config.getString(ConfigPowerups._1_UP_NAME);
 		_1upChance = CommonsHelper.parseIntOrGetDefault(config.getString(ConfigPowerups._1_UP_CHANCE), 10);
 		
