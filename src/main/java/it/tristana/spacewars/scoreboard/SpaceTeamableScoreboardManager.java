@@ -13,28 +13,22 @@ import it.tristana.commons.helper.TeamsColors;
 import it.tristana.commons.scoreboard.TeamableScoreboard;
 import it.tristana.spacewars.arena.SpaceArena;
 import it.tristana.spacewars.arena.team.SpaceTeam;
-import it.tristana.spacewars.config.SettingsSpaceScoreboard;
+import it.tristana.spacewars.config.ConfigScoreboard;
+import it.tristana.spacewars.config.SettingsScoreboard;
 import it.tristana.spacewars.database.SpaceUser;
 
-public class SpaceInGameScoreboardManager extends TeamableScoreboard<SettingsSpaceScoreboard, SpaceUser, SpaceArena, SpaceTeam> {
+public class SpaceTeamableScoreboardManager extends TeamableScoreboard<SpaceUser, SpaceArena, SpaceTeam> {
 
-	public SpaceInGameScoreboardManager(SpaceArena arena, SettingsSpaceScoreboard settings) {
-		super(arena, settings);
-	}
+	private final SettingsScoreboard settings;
 
-	@Override
-	public void addUser(SpaceUser user) {
-		super.addUser(user);
-	}
-
-	@Override
-	public void removeUser(SpaceUser user) {
-		super.removeUser(user);
+	public SpaceTeamableScoreboardManager(SpaceArena arena, SettingsScoreboard settings) {
+		super(arena);
+		this.settings = settings;
 	}
 
 	@Override
 	protected Objective createObjective() {
-		Objective spacewars = scoreboard.registerNewObjective("spacewarsgame", Criteria.DUMMY, settings.getName());
+		Objective spacewars = scoreboard.registerNewObjective("spacewarsgame", Criteria.DUMMY, getScoreboardName());
 		spacewars.setDisplaySlot(DisplaySlot.SIDEBAR);
 		return spacewars;
 	}
@@ -52,5 +46,20 @@ public class SpaceInGameScoreboardManager extends TeamableScoreboard<SettingsSpa
 	@Override
 	protected void setTeamColor(Team team, Color color) {
 		team.setColor(TeamsColors.fromColor(color));
+	}
+
+	@Override
+	protected String getTeamsPlaceholder() {
+		return ConfigScoreboard.TEAMS_PLACEHOLDER;
+	}
+
+	@Override
+	protected String getScoreboardName() {
+		return settings.getGameName();
+	}
+
+	@Override
+	protected List<String> getScoreboardLines() {
+		return settings.getGameLines();
 	}
 }

@@ -7,7 +7,6 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-import it.tristana.commons.helper.CommonsHelper;
 import it.tristana.commons.interfaces.Tickable;
 import it.tristana.commons.math.CachedSphere;
 import it.tristana.commons.math.SphereHelper;
@@ -19,8 +18,7 @@ public class SpherePowerup implements Tickable {
 	public static final double RADIUS = 3;
 	public static final double RADIUS_SQUARED = RADIUS * RADIUS;
 	public static final int SAMPLES = 100;
-	public static final int TPS = 20;
-	public static final int TICKS_TO_RECHARGE = 8 * TPS;
+	public static final int TICKS_TO_RECHARGE = 8 * SpaceArena.TPS;
 
 	private final SpaceArena arena;
 	private final CachedSphere sphere;
@@ -67,7 +65,6 @@ public class SpherePowerup implements Tickable {
 				Vector eyesVector = eyes.toVector();
 				Vector offset = eyesVector.clone().normalize().multiply(radius * 2);
 				double distance = distanceLineDot(eyesVector.clone().subtract(offset), eyesVector.clone().add(offset), sphere.getCenter().toVector());
-				CommonsHelper.broadcast(String.format("Distance: %.3f", distance));
 				player.setVelocity(player.getVelocity().multiply(1 + 1d / (radius - distance)));
 				break;
 			}

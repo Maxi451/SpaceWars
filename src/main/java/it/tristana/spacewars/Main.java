@@ -30,6 +30,7 @@ import it.tristana.commons.listener.ChatListener;
 import it.tristana.commons.listener.GuiListener;
 import it.tristana.commons.listener.LoginQuitListener;
 import it.tristana.commons.listener.VillagerShopListener;
+import it.tristana.commons.scoreboard.ScoreboardManager;
 import it.tristana.spacewars.arena.SpaceArena;
 import it.tristana.spacewars.arena.SpaceArenaLoader;
 import it.tristana.spacewars.arena.player.SpacePlayer;
@@ -43,7 +44,7 @@ import it.tristana.spacewars.config.SettingsCommands;
 import it.tristana.spacewars.config.SettingsKits;
 import it.tristana.spacewars.config.SettingsMessages;
 import it.tristana.spacewars.config.SettingsPowerups;
-import it.tristana.spacewars.config.SettingsSpaceScoreboard;
+import it.tristana.spacewars.config.SettingsScoreboard;
 import it.tristana.spacewars.database.SpaceDatabase;
 import it.tristana.spacewars.database.SpaceUser;
 import it.tristana.spacewars.gui.SpaceClickedGuiManager;
@@ -59,6 +60,7 @@ import it.tristana.spacewars.listener.PlayerDeathListener;
 import it.tristana.spacewars.listener.RemovedEventsListener;
 import it.tristana.spacewars.listener.ShotListener;
 import it.tristana.spacewars.listener.SpaceEventsListener;
+import it.tristana.spacewars.scoreboard.SpacePersonalScoreboardManager;
 
 public final class Main extends PluginDraft implements Reloadable, DatabaseHolder, PartiesHolder, MainLobbyHolder {
 
@@ -75,7 +77,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 	private SettingsMessages settingsMessages;
 	private SettingsTeams settingsTeams;
 	private SettingsArena settingsArena;
-	private SettingsSpaceScoreboard settingsScoreboard;
+	private SettingsScoreboard settingsScoreboard;
 
 	private DatabaseManager<SpaceUser> database;
 	private UsersManager<SpaceUser> usersManager;
@@ -85,6 +87,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 	private ArenaLoader<SpaceArena> arenaLoader;
 	private PlayersManager playersManager;
 	private PartiesManager partiesManager;
+	private ScoreboardManager<SpaceUser> lobbyScoreboardManager;
 	private KitsManager kitsManager;
 
 	private Location mainLobby;
@@ -189,7 +192,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		return settingsCommands;
 	}
 
-	public SettingsSpaceScoreboard getSettingsScoreboard() {
+	public SettingsScoreboard getSettingsScoreboard() {
 		return settingsScoreboard;
 	}
 
@@ -252,7 +255,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		if (mainLobby != null) {
 			arenaLoader.loadArenas().forEach(arena -> arenasManager.addArena(arena));
 		}
-		arenasManager.startClock(this, 4);
+		arenasManager.startClock(this, SpaceArena.TPS);
 	}
 
 	private void createSettings() {
@@ -262,7 +265,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		settingsMessages = new SettingsMessages(folder);
 		settingsTeams = new SettingsTeams(folder);
 		settingsArena = new SettingsArena(folder);
-		settingsScoreboard = new SettingsSpaceScoreboard(folder);
+		settingsScoreboard = new SettingsScoreboard(folder);
 	}
 
 	private void loadManagers() throws NoSuchMethodException {
@@ -273,6 +276,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		clickedGuiManager = new SpaceClickedGuiManager();
 		partiesManager = new BasicPartiesManager();
 		kitsManager = new KitsManager(this, settingsKits);
+		lobbyScoreboardManager = new SpacePersonalScoreboardManager(this, settingsScoreboard::getLobbyName, settingsScoreboard::getLobbyLines);
 		kitsManager.loadDefaultKits();
 		if (isPapiEnabled) {
 			new PapiManager(this, usersManager).register();
@@ -281,7 +285,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 	}
 
 	private void registerListeners() {
-		register(new LoginQuitListener<>(usersManager, database, this, new SpaceLoginAction(this, playersManager), new SpaceQuitAction(this, playersManager)));
+		register(new LoginQuitListener<>(usersManager, database, this, new SpaceLoginAction(this, playersManager, lobbyScoreboardManager), new SpaceQuitAction(this, playersManager, lobbyScoreboardManager)));
 		register(new ChatListener(chatManager));
 		register(new GuiListener(clickedGuiManager));
 		register(new ShotListener(arenasManager));

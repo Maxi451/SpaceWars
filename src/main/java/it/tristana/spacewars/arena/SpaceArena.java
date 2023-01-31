@@ -28,6 +28,7 @@ import it.tristana.commons.interfaces.gui.ClickedGuiManager;
 import it.tristana.commons.interfaces.util.Powerup;
 import it.tristana.commons.interfaces.util.PowerupsManager;
 import it.tristana.commons.interfaces.util.TickablesManager;
+import it.tristana.commons.scoreboard.ScoreboardManager;
 import it.tristana.spacewars.Main;
 import it.tristana.spacewars.arena.player.SpacePlayer;
 import it.tristana.spacewars.arena.player.kit.Kit;
@@ -39,11 +40,15 @@ import it.tristana.spacewars.arena.team.Nexus;
 import it.tristana.spacewars.arena.team.SpaceTeam;
 import it.tristana.spacewars.config.SettingsMessages;
 import it.tristana.spacewars.config.SettingsPowerups;
+import it.tristana.spacewars.config.SettingsScoreboard;
 import it.tristana.spacewars.database.SpaceUser;
 import it.tristana.spacewars.gui.kit.GuiKit;
-import it.tristana.spacewars.scoreboard.SpaceInGameScoreboardManager;
+import it.tristana.spacewars.scoreboard.SpacePersonalScoreboardManager;
+import it.tristana.spacewars.scoreboard.SpaceTeamableScoreboardManager;
 
 public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> implements Reloadable, ShopArena<SpacePlayer, SpaceVillagerShop> {
+
+	public static final int TPS = 4;
 
 	private final Main plugin;
 	private final UsersManager<SpaceUser> usersManager;
@@ -52,7 +57,8 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	private final Collection<SpaceVillagerShop> shops;
 	private final ClickedGuiManager guiManager;
 	private final PowerupsManager<SpacePlayer> powerupsManager;
-	private final SpaceInGameScoreboardManager scoreboardManager;
+	private final ScoreboardManager<SpaceUser> preGameScoreboardManager;
+	private final ScoreboardManager<SpaceUser> gameScoreboardManager;
 	private final PlayersManager playersManager;
 	private final KitsManager kitsManager;
 
@@ -72,7 +78,9 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		this.kitsManager = plugin.getKitsManager();
 		this.guiManager = plugin.getClickedGuiManager();
 		this.settingsPowerups = plugin.getSettingsPowerups();
-		this.scoreboardManager = new SpaceInGameScoreboardManager(this, plugin.getSettingsScoreboard());
+		SettingsScoreboard settingsScoreboard = plugin.getSettingsScoreboard();
+		this.preGameScoreboardManager = new SpacePersonalScoreboardManager(plugin, settingsScoreboard::getPreGameName, settingsScoreboard::getPreGameLines);
+		this.gameScoreboardManager = new SpaceTeamableScoreboardManager(this, settingsScoreboard);
 		this.settingsMessages = plugin.getSettingsMessages();
 		this.settingsTeams = plugin.getSettingsTeams();
 		nexusLocations = new ArrayList<>();
@@ -94,7 +102,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		clearInventories();
 		players.forEach(SpacePlayer::giveDefaultItems);
 		players.forEach(SpacePlayer::setPlayingGameMode);
-		players.forEach(player -> scoreboardManager.addUser(player.getUser()));
+		players.forEach(player -> gameScoreboardManager.addUser(player.getUser()));
 		buildNexuses();
 		world.setGameRule(GameRule.NATURAL_REGENERATION, false);
 	}
@@ -150,7 +158,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		teams.forEach(SpaceTeam::runTick);
 		players.forEach(SpacePlayer::runTick);
 		spheres.forEach(SpherePowerup::runTick);
-		scoreboardManager.runTick();
+		gameScoreboardManager.runTick();
 	}
 
 	@Override
@@ -240,11 +248,11 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	public void onPlayerDeath(SpacePlayer spacePlayer) {
 		SpacePlayer killer = spacePlayer.getLastAttacker();
 		if (killer == null) {
-			broadcast(CommonsHelper.replaceAll(settingsMessages.getPlayerKilledSelf(), new String[] {"{player color}", "{player}"}, new String[] {spacePlayer.getTeam().getColorCode(), spacePlayer.getPlayer().getName()}));
+			broadcast(CommonsHelper.replaceAll(settingsMessages.getPlayerKilledSelf(), new String[] { "{player color}", "{player}"}, new String[] {spacePlayer.getTeam().getColorCode(), spacePlayer.getPlayer().getName() }));
 		} else {
 			broadcast(CommonsHelper.replaceAll(settingsMessages.getPlayerKilled(),
-					new String[] {"{player color}", "{player}", "{killer color}", "{killer}"},
-					new String[] {spacePlayer.getTeam().getColorCode(), spacePlayer.getPlayer().getName(), killer.getTeam().getColorCode(), killer.getPlayer().getName()}));
+					new String[] { "{player color}", "{player}", "{killer color}", "{killer}" },
+					new String[] { spacePlayer.getTeam().getColorCode(), spacePlayer.getPlayer().getName(), killer.getTeam().getColorCode(), killer.getPlayer().getName() }));
 		}
 		spacePlayer.onDeath();
 		if (spacePlayer.getLives() <= 0) {
@@ -262,7 +270,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 
 	public void givePowerup(SpacePlayer player, Powerup<SpacePlayer> powerup) {
 		if (powerup.doAction(player)) {
-			broadcast(CommonsHelper.replaceAll(settingsMessages.getPlayerGotPowerup(), new String[] {"{player color}", "{player}", "{powerup}"}, new String[] {player.getTeam().getColorCode(), player.getPlayer().getName(), powerup.getName()}));
+			broadcast(CommonsHelper.replaceAll(settingsMessages.getPlayerGotPowerup(), new String[] { "{player color}", "{player}", "{powerup}" }, new String[] { player.getTeam().getColorCode(), player.getPlayer().getName(), powerup.getName() }));
 		}
 	}
 
@@ -327,7 +335,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		for (PotionEffect effect : player.getActivePotionEffects()) {
 			player.removePotionEffect(effect.getType());
 		}
-		scoreboardManager.removeUser(usersManager.getUser(player));
+		gameScoreboardManager.removeUser(usersManager.getUser(player));
 		players.remove(spacePlayer);
 		SpaceTeam team = spacePlayer.getTeam();
 		boolean hasTeam = team != null;
