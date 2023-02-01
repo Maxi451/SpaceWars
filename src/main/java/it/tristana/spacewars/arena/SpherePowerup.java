@@ -76,9 +76,9 @@ public class SpherePowerup implements Tickable {
 	}
 
 	private int getTotalTicksToRecharge() {
-		return TICKS_TO_RECHARGE * arena.getTps();
+		return TICKS_TO_RECHARGE;
 	}
-	
+
 	private boolean isPlayerInside(Player player) {
 		return player.getLocation().distanceSquared(sphere.getCenter()) < RADIUS_SQUARED;
 	}

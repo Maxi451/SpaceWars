@@ -25,6 +25,7 @@ public class ConfigScoreboard extends Config {
 	private static final String GAME = "game.";
 	public static final String GAME_NAME = GAME + NAME;
 	public static final String GAME_LINES = GAME + LINES;
+	public static final String GAME_TEAM = GAME + "team";
 
 	public ConfigScoreboard(File folder) {
 		super(new File(folder, "scoreboard.yml"));
@@ -34,13 +35,14 @@ public class ConfigScoreboard extends Config {
 	protected void createDefault() {
 		set(IS_ENABLED, "true");
 
-		set(LOBBY_NAME, "SpaceWars Lobby");
-		set(LOBBY_LINES, Arrays.asList("line1", "line", "line3"));
+		set(LOBBY_NAME, "SpaceWars");
+		set(LOBBY_LINES, Arrays.asList("line1", "line2", "line3"));
 
-		set(PRE_GAME_NAME, "SpaceWars Lobby");
-		set(PRE_GAME_LINES, Arrays.asList("line1", "line", "line3"));
+		set(PRE_GAME_NAME, "SpaceWars");
+		set(PRE_GAME_LINES, Arrays.asList("line4", "line5", "line6"));
 
-		set(GAME_NAME, "SpaceWars Lobby");
-		set(GAME_LINES, Arrays.asList("line1", "line", "line3"));
+		set(GAME_NAME, "SpaceWars");
+		set(GAME_LINES, Arrays.asList("line1", TEAMS_PLACEHOLDER, "line3"));
+		set(GAME_TEAM, "{team color}{team name} &f- &6{lives} &f[{has nexus}&f]");
 	}
 }

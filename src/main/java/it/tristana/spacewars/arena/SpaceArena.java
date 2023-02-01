@@ -49,8 +49,6 @@ import it.tristana.spacewars.scoreboard.SpaceTeamableScoreboardManager;
 
 public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> implements Reloadable, ShopArena<SpacePlayer, SpaceVillagerShop> {
 
-	public static final int TPS = 4;
-
 	private final Main plugin;
 	private final UsersManager<SpaceUser> usersManager;
 	private final List<Location> nexusLocations;
@@ -58,8 +56,6 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	private final Collection<SpaceVillagerShop> shops;
 	private final ClickedGuiManager guiManager;
 	private final PowerupsManager<SpacePlayer> powerupsManager;
-	private final ScoreboardManager<SpaceUser> preGameScoreboardManager;
-	private final ScoreboardManager<SpaceUser> gameScoreboardManager;
 	private final PlayersManager playersManager;
 	private final KitsManager kitsManager;
 
@@ -68,6 +64,8 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	private final SettingsMessages settingsMessages;
 	private final SettingsTeams settingsTeams;
 
+	private ScoreboardManager<SpaceUser> preGameScoreboardManager;
+	private ScoreboardManager<SpaceUser> gameScoreboardManager;
 	private TickablesManager playersPositionManager;
 
 	public SpaceArena(World world, String name, Main plugin) {
@@ -79,9 +77,6 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		this.guiManager = plugin.getClickedGuiManager();
 		this.settingsArena = plugin.getSettingsArena();
 		this.settingsPowerups = plugin.getSettingsPowerups();
-		SettingsScoreboard settingsScoreboard = plugin.getSettingsScoreboard();
-		this.preGameScoreboardManager = new SpacePersonalScoreboardManager(plugin, settingsScoreboard::getPreGameName, settingsScoreboard::getPreGameLines);
-		this.gameScoreboardManager = new SpaceTeamableScoreboardManager(this, settingsScoreboard);
 		this.settingsMessages = plugin.getSettingsMessages();
 		this.settingsTeams = plugin.getSettingsTeams();
 		this.nexusLocations = new ArrayList<>();
@@ -97,11 +92,6 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	}
 
 	@Override
-	public int getTps() {
-		return SpaceArena.TPS;
-	}
-
-	@Override
 	public void startGame() {
 		super.startGame();
 
@@ -114,6 +104,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		}
 		int startingLives = minPlayers * settingsArena.getStartingLivesPerPlayer();
 
+		gameScoreboardManager = new SpaceTeamableScoreboardManager(this, plugin.getSettingsScoreboard());
 		teams.forEach(team -> team.setLives(startingLives));
 		players.forEach(player -> {
 			if (player.getKit() == null) {
@@ -141,7 +132,9 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		if (onJoin) {
 			openGuiMenu(player);
 			playersManager.fixHiddenPlayers(player);
-			preGameScoreboardManager.addUser(usersManager.getUser(player));
+			SpaceUser user = usersManager.getUser(player);
+			preGameScoreboardManager.addUser(user);
+			plugin.removeFromMainScoreboard(user);
 		}
 		return onJoin;
 	}
@@ -171,10 +164,6 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 
 	@Override
 	protected void playingPhase() {
-		if (!isFullTick()) {
-			return;
-		}
-
 		if (checkWinningConditions()) {
 			setStatus(Status.ENDING);
 			CommonsHelper.broadcast("Game ended");
@@ -218,6 +207,9 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		playersPositionManager = new BasicTickablesManager();
 		spheres.forEach(playersPositionManager::registerTickable);
 		playersPositionManager.startClock(plugin, 1);
+		SettingsScoreboard settingsScoreboard = plugin.getSettingsScoreboard();
+		preGameScoreboardManager = new SpacePersonalScoreboardManager(plugin, settingsScoreboard::getPreGameName, settingsScoreboard::getPreGameLines);
+		gameScoreboardManager = null;
 	}
 
 	@Override
@@ -359,7 +351,13 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		for (PotionEffect effect : player.getActivePotionEffects()) {
 			player.removePotionEffect(effect.getType());
 		}
-		gameScoreboardManager.removeUser(usersManager.getUser(player));
+
+		SpaceUser user = usersManager.getUser(player);
+		if (gameScoreboardManager != null) {
+			gameScoreboardManager.removeUser(user);
+		}
+		plugin.addToMainScoreboard(user);
+
 		players.remove(spacePlayer);
 		SpaceTeam team = spacePlayer.getTeam();
 		boolean hasTeam = team != null;

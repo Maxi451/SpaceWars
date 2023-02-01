@@ -1,14 +1,16 @@
 package it.tristana.spacewars.scoreboard;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.scoreboard.Criteria;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
 
+import it.tristana.commons.helper.CommonsHelper;
 import it.tristana.commons.helper.TeamsColors;
 import it.tristana.commons.scoreboard.TeamableScoreboard;
 import it.tristana.spacewars.arena.SpaceArena;
@@ -22,20 +24,25 @@ public class SpaceTeamableScoreboardManager extends TeamableScoreboard<SpaceUser
 	private final SettingsScoreboard settings;
 
 	public SpaceTeamableScoreboardManager(SpaceArena arena, SettingsScoreboard settings) {
-		super(arena);
+		super(arena, settings::getGameName);
 		this.settings = settings;
+		reload();
 	}
 
 	@Override
-	protected Objective createObjective() {
-		Objective spacewars = scoreboard.registerNewObjective("spacewarsgame", Criteria.DUMMY, getScoreboardName());
+	protected Objective createObjective(String name) {
+		Objective spacewars = scoreboard.registerNewObjective(ChatColor.stripColor(name), Criteria.DUMMY, name);
 		spacewars.setDisplaySlot(DisplaySlot.SIDEBAR);
 		return spacewars;
 	}
 
 	@Override
 	protected List<String> parseTeam(SpaceTeam team) {
-		return Arrays.asList(team.getName(), Integer.toHexString(team.getArmorColor().asRGB()));
+		String[] lookingFor = new String[] { "{team color}", "{team name}", "{lives}", "{has nexus}" };
+		String[] replacement = new String[] { team.getColorCode(), team.getName(), String.valueOf(team.getLives()), team.getNexus().isBroken() ? "&4&l\u274c" : "&2&l\u2705"};
+		List<String> lines = new ArrayList<>();
+		lines.add(CommonsHelper.replaceAll(settings.getGameTeam(), lookingFor, replacement));
+		return lines;
 	}
 
 	@Override

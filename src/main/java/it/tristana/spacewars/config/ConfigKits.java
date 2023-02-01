@@ -63,7 +63,7 @@ public class ConfigKits extends Config {
 
 	@Override
 	protected void createDefault() {
-		set(MINER_NAME, "Kit &bminer");
+		set(MINER_NAME, "&bminer");
 		set(MINER_LORE, Arrays.asList(
 				"Starts with an Efficiency III pickaxe"
 		));
@@ -73,7 +73,7 @@ public class ConfigKits extends Config {
 		set(MINER_GUN_FMJ, "false");
 		set(MINER_GUN_LONG_BARREL, "false");
 		
-		set(SOLDIER_NAME, "Kit &bSoldier");
+		set(SOLDIER_NAME, "&bSoldier");
 		set(SOLDIER_LORE, Arrays.asList(
 				"&fThis kit",
 				"&fis &6aggressive"
@@ -84,7 +84,7 @@ public class ConfigKits extends Config {
 		set(SOLDIER_GUN_FMJ, "false");
 		set(SOLDIER_GUN_LONG_BARREL, "false");
 		
-		set(SNIPER_NAME, "Kit &bsniper");
+		set(SNIPER_NAME, "&bsniper");
 		set(SNIPER_LORE, Arrays.asList(
 				"Ignores 50% of the enemy's bonus armor and",
 				"has the long barrel powerup always active"
@@ -96,7 +96,7 @@ public class ConfigKits extends Config {
 		set(SNIPER_GUN_LONG_BARREL, "true");
 		set(SNIPER_ENEMY_BONUS_ARMOR_IGNORED_PERCENTAGE, "50");
 		
-		set(DEFENDER_NAME, "Kit &bdefender");
+		set(DEFENDER_NAME, "&bdefender");
 		set(DEFENDER_LORE, Arrays.asList(
 				"When near his nexus (< 24 blocks) gains these stats:",
 				"+25% Armor",

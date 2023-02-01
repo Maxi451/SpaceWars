@@ -26,6 +26,7 @@ public class SpacePersonalScoreboardManager extends BasicScoreboardManager<Space
 		this.plugin = plugin;
 		this.nameSupplier = nameSupplier;
 		this.linesSupplier = linesSupplier;
+		reload();
 	}
 
 	@Override

@@ -18,6 +18,7 @@ public class SettingsScoreboard extends Settings<ConfigScoreboard> {
 
 	private String gameName;
 	private List<String> gameLines;
+	private String gameTeam;
 
 	public SettingsScoreboard(File folder) {
 		super(folder, ConfigScoreboard.class);
@@ -35,6 +36,11 @@ public class SettingsScoreboard extends Settings<ConfigScoreboard> {
 
 		gameName = config.getString(ConfigScoreboard.GAME_NAME);
 		gameLines = config.getList(ConfigScoreboard.GAME_LINES);
+		gameTeam = config.getString(ConfigScoreboard.GAME_TEAM);
+	}
+
+	public String getGameTeam() {
+		return gameTeam;
 	}
 
 	public boolean isEnabled() {

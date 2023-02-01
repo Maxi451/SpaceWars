@@ -168,6 +168,14 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		this.mainLobby = mainLobby;
 	}
 
+	public void addToMainScoreboard(SpaceUser user) {
+		lobbyScoreboardManager.addUser(user);
+	}
+	
+	public void removeFromMainScoreboard(SpaceUser user) {
+		lobbyScoreboardManager.removeUser(user);
+	}
+	
 	public ArenasManager<SpaceArena, SpacePlayer> getArenasManager() {
 		return arenasManager;
 	}
@@ -259,7 +267,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		if (mainLobby != null) {
 			arenaLoader.loadArenas().forEach(arena -> arenasManager.addArena(arena));
 		}
-		arenasManager.startClock(this, 1);
+		arenasManager.startClock(this, 20);
 	}
 
 	private void createSettings() {

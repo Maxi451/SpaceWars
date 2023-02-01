@@ -24,7 +24,7 @@ public class GunSniper extends Gun {
 
 	@Override
 	protected ItemStack forgeItem() {
-		return new ItemStack(Material.SPYGLASS);
+		return new ItemStack(Material.DIAMOND_HOE);
 	}
 
 	@Override
