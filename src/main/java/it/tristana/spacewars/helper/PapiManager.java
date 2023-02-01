@@ -12,8 +12,6 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 
 /**
  * Hooks into PlaceholderAPI
- * @author TheSniper99
- *
  */
 
 public final class PapiManager extends PlaceholderExpansion {
@@ -21,7 +19,7 @@ public final class PapiManager extends PlaceholderExpansion {
 	/**
 	 * A reference to the main class instance
 	 */
-	
+
 	private Main plugin;
 	private UsersManager<SpaceUser> usersManager;
 
@@ -73,11 +71,11 @@ public final class PapiManager extends PlaceholderExpansion {
 	/**
 	 * ThePit registers its placeholders directly in the plugin
 	 */
-	
+
 	@Override
-    public boolean persist() {
-        return true;
-    }
+	public boolean persist() {
+		return true;
+	}
 
 	/**
 	 * Available placeholders:
@@ -88,13 +86,13 @@ public final class PapiManager extends PlaceholderExpansion {
 	 * 	<li>%sw_wins%</li>
 	 * </ul>
 	 */
-	
+
 	@Override
 	public String onPlaceholderRequest(final Player player, String identifier) {
 		if (player == null) {
 			return "*** PLAYER OFFLINE ***";
 		}
-		
+
 		identifier = identifier.toLowerCase();
 		SpaceUser user = usersManager.getUser(player);
 		switch (identifier) {

@@ -20,18 +20,35 @@ public class SpaceTeam extends BasicTeam<SpacePlayer, SpaceArena> implements Tic
 	private Nexus nexus;
 	private Color armorColor;
 	private ChatColor chatColor;
+	private int lives;
 
 	public SpaceTeam(SpaceArena arena, Location spawnpoint, String name, String colorCode, Nexus nexus, Color armorColor) {
 		super(arena, spawnpoint, name, colorCode, armorColor);
 		this.nexus = nexus;
 		nexus.setTeam(this);
 		this.armorColor = armorColor;
-		chatColor = ChatColor.of(new java.awt.Color(armorColor.asRGB()));
+		this.chatColor = ChatColor.of(new java.awt.Color(armorColor.asRGB()));
 	}
 
 	@Override
 	public void runTick() {
 		nexus.runTick();
+	}
+
+	public void removeLife() {
+		lives --;
+	}
+
+	public void addLife() {
+		lives ++;
+	}
+
+	public void setLives(int lives) {
+		this.lives = lives;
+	}
+
+	public int getLives() {
+		return lives;
 	}
 
 	public Nexus getNexus() {

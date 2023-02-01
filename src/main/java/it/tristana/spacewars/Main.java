@@ -172,6 +172,10 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		return arenasManager;
 	}
 
+	public SettingsArena getSettingsArena() {
+		return settingsArena;
+	}
+
 	public SettingsKits getSettingsKits() {
 		return settingsKits;
 	}
@@ -255,7 +259,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		if (mainLobby != null) {
 			arenaLoader.loadArenas().forEach(arena -> arenasManager.addArena(arena));
 		}
-		arenasManager.startClock(this, SpaceArena.TPS);
+		arenasManager.startClock(this, 1);
 	}
 
 	private void createSettings() {

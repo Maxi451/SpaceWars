@@ -38,6 +38,7 @@ import it.tristana.spacewars.arena.shop.SpaceVillagerShop;
 import it.tristana.spacewars.arena.team.ColorsHelper;
 import it.tristana.spacewars.arena.team.Nexus;
 import it.tristana.spacewars.arena.team.SpaceTeam;
+import it.tristana.spacewars.config.SettingsArena;
 import it.tristana.spacewars.config.SettingsMessages;
 import it.tristana.spacewars.config.SettingsPowerups;
 import it.tristana.spacewars.config.SettingsScoreboard;
@@ -62,13 +63,12 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	private final PlayersManager playersManager;
 	private final KitsManager kitsManager;
 
+	private final SettingsArena settingsArena;
 	private final SettingsPowerups settingsPowerups;
 	private final SettingsMessages settingsMessages;
 	private final SettingsTeams settingsTeams;
 
 	private TickablesManager playersPositionManager;
-
-	private int currentTick;
 
 	public SpaceArena(World world, String name, Main plugin) {
 		super(world, name, plugin.getPartiesManager());
@@ -77,16 +77,17 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		this.playersManager = plugin.getPlayersManager();
 		this.kitsManager = plugin.getKitsManager();
 		this.guiManager = plugin.getClickedGuiManager();
+		this.settingsArena = plugin.getSettingsArena();
 		this.settingsPowerups = plugin.getSettingsPowerups();
 		SettingsScoreboard settingsScoreboard = plugin.getSettingsScoreboard();
 		this.preGameScoreboardManager = new SpacePersonalScoreboardManager(plugin, settingsScoreboard::getPreGameName, settingsScoreboard::getPreGameLines);
 		this.gameScoreboardManager = new SpaceTeamableScoreboardManager(this, settingsScoreboard);
 		this.settingsMessages = plugin.getSettingsMessages();
 		this.settingsTeams = plugin.getSettingsTeams();
-		nexusLocations = new ArrayList<>();
-		spheres = new HashSet<>();
-		shops = new HashSet<>();
-		powerupsManager = new BasicPowerupsManager<>(PowerupsBuilder.createPowerups(settingsPowerups));
+		this.nexusLocations = new ArrayList<>();
+		this.spheres = new HashSet<>();
+		this.shops = new HashSet<>();
+		this.powerupsManager = new BasicPowerupsManager<>(PowerupsBuilder.createPowerups(settingsPowerups));
 		reset();
 	}
 
@@ -96,13 +97,35 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	}
 
 	@Override
+	public int getTps() {
+		return SpaceArena.TPS;
+	}
+
+	@Override
 	public void startGame() {
 		super.startGame();
-		selectRandomKitsIfNeeded();
-		clearInventories();
-		players.forEach(SpacePlayer::giveDefaultItems);
-		players.forEach(SpacePlayer::setPlayingGameMode);
-		players.forEach(player -> gameScoreboardManager.addUser(player.getUser()));
+
+		int minPlayers = Integer.MAX_VALUE;
+		for (SpaceTeam team : teams) {
+			int players = team.getPlayers().size();
+			if (players < minPlayers) {
+				minPlayers = players;
+			}
+		}
+		int startingLives = minPlayers * settingsArena.getStartingLivesPerPlayer();
+
+		teams.forEach(team -> team.setLives(startingLives));
+		players.forEach(player -> {
+			if (player.getKit() == null) {
+				player.setKit(kitsManager.getRandom());
+			}
+			player.getPlayer().getInventory().clear();
+			player.giveDefaultItems();
+			player.setPlayingGameMode();
+			SpaceUser user = player.getUser();
+			preGameScoreboardManager.removeUser(user);
+			gameScoreboardManager.addUser(user);
+		});
 		buildNexuses();
 		world.setGameRule(GameRule.NATURAL_REGENERATION, false);
 	}
@@ -118,6 +141,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		if (onJoin) {
 			openGuiMenu(player);
 			playersManager.fixHiddenPlayers(player);
+			preGameScoreboardManager.addUser(usersManager.getUser(player));
 		}
 		return onJoin;
 	}
@@ -147,7 +171,9 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 
 	@Override
 	protected void playingPhase() {
-		currentTick ++;
+		if (!isFullTick()) {
+			return;
+		}
 
 		if (checkWinningConditions()) {
 			setStatus(Status.ENDING);
@@ -192,9 +218,6 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		playersPositionManager = new BasicTickablesManager();
 		spheres.forEach(playersPositionManager::registerTickable);
 		playersPositionManager.startClock(plugin, 1);
-		ticksToStart = 30;
-		ticksToEnd = 5;
-		currentTick = 0;
 	}
 
 	@Override
@@ -247,15 +270,16 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 
 	public void onPlayerDeath(SpacePlayer spacePlayer) {
 		SpacePlayer killer = spacePlayer.getLastAttacker();
+		SpaceTeam team = spacePlayer.getTeam();
 		if (killer == null) {
-			broadcast(CommonsHelper.replaceAll(settingsMessages.getPlayerKilledSelf(), new String[] { "{player color}", "{player}"}, new String[] {spacePlayer.getTeam().getColorCode(), spacePlayer.getPlayer().getName() }));
+			broadcast(CommonsHelper.replaceAll(settingsMessages.getPlayerKilledSelf(), new String[] { "{player color}", "{player}"}, new String[] { team.getColorCode(), spacePlayer.getPlayer().getName() }));
 		} else {
 			broadcast(CommonsHelper.replaceAll(settingsMessages.getPlayerKilled(),
 					new String[] { "{player color}", "{player}", "{killer color}", "{killer}" },
-					new String[] { spacePlayer.getTeam().getColorCode(), spacePlayer.getPlayer().getName(), killer.getTeam().getColorCode(), killer.getPlayer().getName() }));
+					new String[] { team.getColorCode(), spacePlayer.getPlayer().getName(), killer.getTeam().getColorCode(), killer.getPlayer().getName() }));
 		}
 		spacePlayer.onDeath();
-		if (spacePlayer.getLives() <= 0) {
+		if (team.getLives() <= 0) {
 			exit(spacePlayer);
 		}
 	}
@@ -341,7 +365,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		boolean hasTeam = team != null;
 		String[] lookingFor = new String[] { "{player color}", "{player}" };
 		String[] replacements = new String[] { hasTeam ? team.getColorCode() : settingsTeams.getDefaultColor(), player.getName() };
-		String msg = spacePlayer.getLives() == 0 ? settingsMessages.getPlayerEliminated() : settingsMessages.getPlayerLeft();
+		String msg = team.getLives() > 0 ? settingsMessages.getPlayerLeft() : settingsMessages.getPlayerEliminated();
 		broadcast(CommonsHelper.replaceAll(msg, lookingFor, replacements));
 		playersManager.resetPlayer(player, plugin.getMainLobby());
 		if (!hasTeam) {
@@ -362,17 +386,5 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 			}
 		}
 		return teamsAlive < 2;
-	}
-
-	private void selectRandomKitsIfNeeded() {
-		players.forEach(player -> {
-			if (player.getKit() == null) {
-				player.setKit(kitsManager.getRandom());
-			}
-		});
-	}
-
-	private void clearInventories() {
-		players.forEach(player -> player.getPlayer().getInventory().clear());
 	}
 }

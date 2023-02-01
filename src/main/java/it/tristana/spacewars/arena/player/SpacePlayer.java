@@ -17,9 +17,8 @@ import it.tristana.spacewars.database.SpaceUser;
 
 public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> implements Tickable, Shootable, BalanceHolder {
 
-	private static final int TICKS_FOR_FUEL = 8 * SpaceArena.TPS;
-	private static final int TICKS_FOR_RESPAWN = 5 * SpaceArena.TPS;
-	private static final int STARTING_LIVES = 5;
+	private static final int TICKS_FOR_FUEL = 8;
+	private static final int TICKS_FOR_RESPAWN = 5;
 
 	private SpaceUser user;
 	private Kit kit;
@@ -31,12 +30,10 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	private double money;
 	private int ticksForFuel;
 	private int ticksToRespawn;
-	private int lives;
 
 	public SpacePlayer(SpaceArena arena, SpaceUser user) {
 		super(arena, user.getPlayer().getPlayer());
 		this.user = user;
-		lives = STARTING_LIVES;
 		ticksForFuel = TICKS_FOR_FUEL;
 	}
 
@@ -74,11 +71,11 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	}
 
 	public void onDeath() {
-		lives --;
+		team.removeLife();
 		lastAttacker = null;
 		SpaceArena.heal(player);
 		kit.getGun().resetFmjAndLongBarrel();
-		if (lives > 0 && !team.getNexus().isBroken()) {
+		if (team.getLives() > 0 && !team.getNexus().isBroken()) {
 			ticksToRespawn = TICKS_FOR_RESPAWN + 1;
 			player.setGameMode(GameMode.SPECTATOR);
 			player.getInventory().clear();
@@ -91,12 +88,8 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		kit.giveItems(inventory);
 	}
 
-	public int getLives() {
-		return lives;
-	}
-
 	public void onLife() {
-		lives ++;
+		team.addLife();
 	}
 
 	public SpaceUser getUser() {

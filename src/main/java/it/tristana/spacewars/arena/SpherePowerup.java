@@ -18,7 +18,7 @@ public class SpherePowerup implements Tickable {
 	public static final double RADIUS = 3;
 	public static final double RADIUS_SQUARED = RADIUS * RADIUS;
 	public static final int SAMPLES = 100;
-	public static final int TICKS_TO_RECHARGE = 8 * SpaceArena.TPS;
+	public static final int TICKS_TO_RECHARGE = 8;
 
 	private final SpaceArena arena;
 	private final CachedSphere sphere;
@@ -37,7 +37,7 @@ public class SpherePowerup implements Tickable {
 	@Override
 	public void runTick() {
 		if (ticksToRecharge > 0) {
-			int percentage = (int) ((double) ticksToRecharge / TICKS_TO_RECHARGE * points.length);
+			int percentage = (int) ((double) ticksToRecharge / getTotalTicksToRecharge() * points.length);
 			for (int i = 0; i < percentage; i ++) {
 				ParticlesHelper.particle(points[i].toLocation(world), Color.RED);
 			}
@@ -58,7 +58,7 @@ public class SpherePowerup implements Tickable {
 		for (SpacePlayer spacePlayer : arena.getPlayers()) {
 			Player player = spacePlayer.getPlayer();
 			if (isPlayerInside(player)) {
-				ticksToRecharge = TICKS_TO_RECHARGE;
+				ticksToRecharge = getTotalTicksToRecharge();
 				arena.giveRandomPowerup(spacePlayer);
 				Location eyes = player.getEyeLocation();
 				double radius = sphere.getRadius();
@@ -70,11 +70,15 @@ public class SpherePowerup implements Tickable {
 			}
 		}
 	}
-	
+
 	public Location getLocation() {
 		return sphere.getCenter();
 	}
 
+	private int getTotalTicksToRecharge() {
+		return TICKS_TO_RECHARGE * arena.getTps();
+	}
+	
 	private boolean isPlayerInside(Player player) {
 		return player.getLocation().distanceSquared(sphere.getCenter()) < RADIUS_SQUARED;
 	}
