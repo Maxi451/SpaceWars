@@ -363,7 +363,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		boolean hasTeam = team != null;
 		String[] lookingFor = new String[] { "{player color}", "{player}" };
 		String[] replacements = new String[] { hasTeam ? team.getColorCode() : settingsTeams.getDefaultColor(), player.getName() };
-		String msg = team.getLives() > 0 ? settingsMessages.getPlayerLeft() : settingsMessages.getPlayerEliminated();
+		String msg = team == null || team.getLives() > 0 ? settingsMessages.getPlayerLeft() : settingsMessages.getPlayerEliminated();
 		broadcast(CommonsHelper.replaceAll(msg, lookingFor, replacements));
 		playersManager.resetPlayer(player, plugin.getMainLobby());
 		if (!hasTeam) {
