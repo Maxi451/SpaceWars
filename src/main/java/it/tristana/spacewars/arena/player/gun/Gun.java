@@ -77,7 +77,7 @@ public abstract class Gun implements Reloadable {
 		return getItem().isSimilar(other);
 	}
 	
-	public double getDamage(SpacePlayer player) {
+	public double getDamage() {
 		return damage;
 	}
 	

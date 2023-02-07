@@ -8,7 +8,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import it.tristana.commons.interfaces.Reloadable;
-import it.tristana.spacewars.arena.player.SpacePlayer;
 import it.tristana.spacewars.arena.player.gun.Gun;
 import it.tristana.spacewars.config.SettingsKits;
 import it.tristana.spacewars.helper.ItemUtils;
@@ -44,7 +43,7 @@ public abstract class Kit implements Reloadable {
 		return gun;
 	}
 	
-	public double getArmor(SpacePlayer player) {
+	public double getArmor() {
 		return armor;
 	}
 	
@@ -70,7 +69,7 @@ public abstract class Kit implements Reloadable {
 	
 	public abstract List<String> getLore();
 	
-	public abstract double getBaseArmor();
+	protected abstract double getBaseArmor();
 	
 	protected abstract Gun forgeGun();
 }

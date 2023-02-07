@@ -24,6 +24,10 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	private Kit kit;
 	private double bonusArmor;
 	private double bonusDamage;
+	private double bonusArmorPercentage;
+	private double bonusDamagePercentage;
+	private double bonusIgnoredArmor;
+	private double bonusIgnoredArmorPercentage;
 
 	private SpacePlayer lastAttacker;
 
@@ -104,28 +108,48 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		return kit;
 	}
 
-	public void addBonusArmor(double bonusArmor) {
-		this.bonusArmor += bonusArmor;
-	}
-
-	public double getBonusArmor() {
-		return bonusArmor;
-	}
-
 	public double getTotalArmor() {
-		return kit.getArmor(this) + bonusArmor;
+		return getTotalArmor(0);
 	}
 
-	public void addBonusDamage(double bonusDamage) {
-		this.bonusDamage += bonusDamage;
-	}
-
-	public double getBonusDamage() {
-		return bonusDamage;
+	public double getTotalArmor(double armorIgnoredPercentage) {
+		return Math.max((kit.getArmor() + bonusArmor) * (1 + bonusArmorPercentage) * (1 - armorIgnoredPercentage), 0);
 	}
 
 	public double getTotalDamage() {
-		return kit.getGun().getDamage(this) + bonusDamage;
+		return (kit.getGun().getDamage() + bonusDamage) * (1 + bonusDamagePercentage);
+	}
+
+	public double getBonusIgnoredArmor() {
+		return bonusIgnoredArmor;
+	}
+
+	public double getBonusIgnoredArmorPercentage() {
+		return bonusIgnoredArmorPercentage;
+	}
+
+	public void addBonusArmor(double armor, boolean percentage) {
+		if (percentage) {
+			bonusArmorPercentage += armor;
+		} else {
+			bonusArmor += armor;
+		}
+	}
+
+	public void addBonusDamage(double damage, boolean percentage) {
+		if (percentage) {
+			bonusDamagePercentage += damage;
+		} else {
+			bonusDamage += damage;
+		}
+	}
+
+	public void addBonusArmorIgnored(double armorIgnored, boolean percentage) {
+		if (percentage) {
+			bonusIgnoredArmorPercentage += armorIgnored;
+		} else {
+			bonusIgnoredArmor += armorIgnored;
+		}
 	}
 
 	public void setLastAttacker(SpacePlayer lastAttacker) {
@@ -146,6 +170,10 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		if (slot >= 0) {
 			player.getInventory().setItem(slot, kit.getPickaxe());
 		}
+	}
+
+	public void giveFuel() {
+		giveFuel(1);
 	}
 
 	public void giveFuel(int amount) {

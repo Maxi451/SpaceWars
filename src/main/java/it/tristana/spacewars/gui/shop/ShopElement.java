@@ -1,6 +1,7 @@
 package it.tristana.spacewars.gui.shop;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.bukkit.entity.Player;
 
@@ -15,31 +16,39 @@ public abstract class ShopElement extends BasicElement implements ShopItem<Space
 
 	protected final SettingsShop settings;
 	protected final ArenasManager<SpaceArena, SpacePlayer> arenasManager;
-	
-	public ShopElement(SettingsShop settings, ArenasManager<SpaceArena, SpacePlayer> arenasManager, String name, List<String> lore) {
-		super(name, lore);
+	private final Supplier<String> nameGetter;
+
+	public ShopElement(SettingsShop settings, ArenasManager<SpaceArena, SpacePlayer> arenasManager, Supplier<String> nameGetter, Supplier<List<String>> loreGetter) {
+		super(nameGetter.get(), loreGetter.get());
 		this.settings = settings;
 		this.arenasManager = arenasManager;
+		this.nameGetter = nameGetter;
 	}
 
 	@Override
 	public final boolean closesInventory(Player player) {
 		return false;
 	}
-	
+
 	@Override
 	public final void onClick(Player player) {
 		SpaceArena arena = arenasManager.getArenaWithPlayer(player);
 		if (arena == null) {
 			return;
 		}
+
 		doAction(arena.getArenaPlayer(player));
 	}
-	
+
 	@Override
 	public final boolean doAction(SpacePlayer balanceHolder) {
 		double price = getPrice();
 		return balanceHolder.getMoney() > price && run(balanceHolder) && balanceHolder.tryToPay(price);
+	}
+
+	@Override
+	public final String getName() {
+		return nameGetter.get();
 	}
 
 	protected abstract boolean run(SpacePlayer spacePlayer);

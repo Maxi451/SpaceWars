@@ -1,7 +1,6 @@
 package it.tristana.spacewars.gui.shop;
 
-import java.util.List;
-
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -12,29 +11,23 @@ import it.tristana.spacewars.config.SettingsShop;
 
 public class ShopElementArmor extends ShopElement {
 
-	public ShopElementArmor(SettingsShop settings, ArenasManager<SpaceArena, SpacePlayer> arenasManager, String name, List<String> lore) {
-		super(settings, arenasManager, name, lore);
+	public ShopElementArmor(SettingsShop settings, ArenasManager<SpaceArena, SpacePlayer> arenasManager) {
+		super(settings, arenasManager, settings::getArmorName, settings::getArmorLore);
 	}
 
 	@Override
 	public double getPrice() {
-		return 0;
-	}
-
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
+		return settings.getArmorPrice();
 	}
 
 	@Override
 	protected boolean run(SpacePlayer spacePlayer) {
-		return false;
+		spacePlayer.addBonusArmor(settings.getArmorBonusArmorPercentage(), true);
+		return true;
 	}
 
 	@Override
 	protected ItemStack getRawDisplayItem(Player player) {
-		// TODO Auto-generated method stub
-		return null;
+		return new ItemStack(Material.IRON_CHESTPLATE);
 	}
 }
