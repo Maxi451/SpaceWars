@@ -96,12 +96,17 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		kit.giveItems(inventory);
 	}
 	
-	public void buyItem(Class<? extends ShopElement> clazz) {
+	public void buyItem(Class<? extends ShopElement> clazz, boolean isTeamUpgrade) {
+		if (isTeamUpgrade) {
+			team.buyItem(clazz);
+			return;
+		}
+
 		itemsManager.addElement(clazz);
 	}
 	
-	public int getItemLevel(Class<? extends ShopElement> clazz) {
-		return itemsManager.getAmount(clazz);
+	public int getItemLevel(Class<? extends ShopElement> clazz, boolean isTeamUpgrade) {
+		return isTeamUpgrade ? team.getItemLevel(clazz) : itemsManager.getAmount(clazz);
 	}
 
 	public void onLife() {

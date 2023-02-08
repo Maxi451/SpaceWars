@@ -1,5 +1,7 @@
 package it.tristana.spacewars.gui.shop;
 
+import java.util.List;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -7,29 +9,34 @@ import org.bukkit.inventory.ItemStack;
 import it.tristana.spacewars.arena.player.SpacePlayer;
 import it.tristana.spacewars.config.SettingsShop;
 
-public class ShopElementArmor extends ShopElement {
+public class ShopElementRepairNexus extends ShopElement {
 
-	public ShopElementArmor(SettingsShop settings) {
-		super(settings.getArmorName(), settings.getArmorLore());
+	public ShopElementRepairNexus(SettingsShop settings) {
+		super(settings.getRepairNexusName(), settings.getRepairNexusLore());
 	}
 
 	@Override
 	public double getPrice() {
-		return settingsShop.getArmorPrice();
+		return settingsShop.getRepairNexusPrice();
+	}
+	
+	@Override
+	public boolean isTeamUpgrade() {
+		return true;
 	}
 
 	@Override
 	protected void run(SpacePlayer spacePlayer) {
-		spacePlayer.addBonusArmor(settingsShop.getArmorBonusArmorPercentage(), true);
+		spacePlayer.getTeam().getNexus().build();
 	}
 
 	@Override
 	protected int getMaxLevel() {
-		return settingsShop.getArmorMaxLevel();
+		return settingsShop.getRepairNexusMaxLevel();
 	}
 
 	@Override
 	protected ItemStack getRawDisplayItem(Player player) {
-		return new ItemStack(Material.IRON_CHESTPLATE);
+		return new ItemStack(Material.OBSIDIAN);
 	}
 }

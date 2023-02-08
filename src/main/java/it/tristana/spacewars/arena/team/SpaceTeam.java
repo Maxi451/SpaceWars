@@ -10,7 +10,9 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import it.tristana.commons.arena.player.BasicTeam;
 import it.tristana.commons.interfaces.Tickable;
 import it.tristana.spacewars.arena.SpaceArena;
+import it.tristana.spacewars.arena.player.ElementsCounter;
 import it.tristana.spacewars.arena.player.SpacePlayer;
+import it.tristana.spacewars.gui.shop.ShopElement;
 import it.tristana.spacewars.helper.ItemUtils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -21,6 +23,8 @@ public class SpaceTeam extends BasicTeam<SpacePlayer, SpaceArena> implements Tic
 	private Color armorColor;
 	private ChatColor chatColor;
 	private int lives;
+	
+	private ElementsCounter<ShopElement> itemsManager;
 
 	public SpaceTeam(SpaceArena arena, Location spawnpoint, String name, String colorCode, Nexus nexus, Color armorColor) {
 		super(arena, spawnpoint, name, colorCode, armorColor);
@@ -28,11 +32,20 @@ public class SpaceTeam extends BasicTeam<SpacePlayer, SpaceArena> implements Tic
 		nexus.setTeam(this);
 		this.armorColor = armorColor;
 		this.chatColor = ChatColor.of(new java.awt.Color(armorColor.asRGB()));
+		this.itemsManager = new ElementsCounter<>();
 	}
 
 	@Override
 	public void runTick() {
 		nexus.runTick();
+	}
+	
+	public void buyItem(Class<? extends ShopElement> clazz) {
+		itemsManager.addElement(clazz);
+	}
+	
+	public int getItemLevel(Class<? extends ShopElement> clazz) {
+		return itemsManager.getAmount(clazz);
 	}
 
 	public void removeLife() {

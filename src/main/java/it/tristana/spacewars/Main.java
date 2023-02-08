@@ -242,7 +242,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 
 	private void registerGuis() {
 		clickedGuiManager.registerGui(new GuiKit(settingsKits.getGuiName(), kitsManager));
-		clickedGuiManager.registerGui(new GuiShop(settingsShop.getGuiName(), settingsShop, arenasManager));
+		clickedGuiManager.registerGui(new GuiShop(settingsShop.getGuiName(), settingsShop));
 	}
 
 	private void selfDestroy(Throwable t, String message) {
