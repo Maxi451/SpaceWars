@@ -15,6 +15,9 @@ public class ConfigMessages extends Config {
 	public static final String MONEY_GAINED = "money-gained";
 	public static final String PLAYER_GOT_POWERUP = "player-got-powerup";
 	public static final String KIT_CHOSEN = "kit-chosen";
+	public static final String NOT_ENOUGH_MONEY = "not-enough-money";
+	public static final String MAX_ITEM_LEVEL_REACHED = "max-item-level-reached";
+	public static final String ITEM_BOUGHT = "item-bought";
 
 	public ConfigMessages(File folder) {
 		super(new File(folder, "messages.yml"));
@@ -31,5 +34,8 @@ public class ConfigMessages extends Config {
 		set(MONEY_GAINED, "You gained &6{money} &fmoney");
 		set(PLAYER_GOT_POWERUP, "{player color}{player} picked up &6{powerup}");
 		set(KIT_CHOSEN, "You have chosen the kit {kit}&r! Use '&b/sw kit&r' to change it again");
+		set(NOT_ENOUGH_MONEY, "&cYou need {money} more money!");
+		set(MAX_ITEM_LEVEL_REACHED, "&cYou already reached the maximum level for {item}!");
+		set(ITEM_BOUGHT, "You bought &6{item}");
 	}
 }

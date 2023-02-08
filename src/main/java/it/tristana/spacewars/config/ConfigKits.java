@@ -7,6 +7,8 @@ import it.tristana.commons.config.Config;
 
 public class ConfigKits extends Config {
 
+	public static final String GUI_NAME = "gui-name";
+	
 	private static final String NAME = "name";
 	private static final String LORE = "lore";
 	private static final String ARMOR = "armor";
@@ -63,6 +65,8 @@ public class ConfigKits extends Config {
 
 	@Override
 	protected void createDefault() {
+		set(GUI_NAME, "&bChoose a kit!");
+		
 		set(MINER_NAME, "&bminer");
 		set(MINER_LORE, Arrays.asList(
 				"Starts with an Efficiency III pickaxe"

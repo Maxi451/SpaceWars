@@ -45,6 +45,7 @@ import it.tristana.spacewars.config.SettingsKits;
 import it.tristana.spacewars.config.SettingsMessages;
 import it.tristana.spacewars.config.SettingsPowerups;
 import it.tristana.spacewars.config.SettingsScoreboard;
+import it.tristana.spacewars.config.SettingsShop;
 import it.tristana.spacewars.database.SpaceDatabase;
 import it.tristana.spacewars.database.SpaceUser;
 import it.tristana.spacewars.gui.SpaceClickedGuiManager;
@@ -78,6 +79,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 	private SettingsTeams settingsTeams;
 	private SettingsArena settingsArena;
 	private SettingsScoreboard settingsScoreboard;
+	private SettingsShop settingsShop;
 
 	private DatabaseManager<SpaceUser> database;
 	private UsersManager<SpaceUser> usersManager;
@@ -149,6 +151,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		settingsTeams.reload();
 		settingsArena.reload();
 		settingsScoreboard.reload();
+		settingsShop.reload();
 		clickedGuiManager.clearGuis();
 		registerGuis();
 	}
@@ -171,11 +174,11 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 	public void addToMainScoreboard(SpaceUser user) {
 		lobbyScoreboardManager.addUser(user);
 	}
-	
+
 	public void removeFromMainScoreboard(SpaceUser user) {
 		lobbyScoreboardManager.removeUser(user);
 	}
-	
+
 	public ArenasManager<SpaceArena, SpacePlayer> getArenasManager() {
 		return arenasManager;
 	}
@@ -208,6 +211,10 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		return settingsScoreboard;
 	}
 
+	public SettingsShop getSettingsShop() {
+		return settingsShop;
+	}
+
 	public UsersManager<SpaceUser> getUsersManager() {
 		return usersManager;
 	}
@@ -234,7 +241,8 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 	}
 
 	private void registerGuis() {
-		clickedGuiManager.registerGui(new GuiKit(CommonsHelper.toChatColors("&6&lKits"), kitsManager));
+		clickedGuiManager.registerGui(new GuiKit(settingsKits.getGuiName(), kitsManager));
+		clickedGuiManager.registerGui(new GuiShop(settingsShop.getGuiName(), settingsShop, arenasManager));
 	}
 
 	private void selfDestroy(Throwable t, String message) {
@@ -245,12 +253,10 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 	}
 
 	private void closeArenas() {
-		for (SpaceArena arena : arenasManager.getArenas()) {
-			try {
-				arena.closeArena();
-			} catch (Exception e) {
-				writeThrowableOnErrorsFile(e);
-			}
+		try {
+			arenasManager.getArenas().forEach(SpaceArena::closeArena);
+		} catch (Exception e) {
+			writeThrowableOnErrorsFile(e);
 		}
 	}
 
@@ -265,7 +271,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		arenaLoader = new SpaceArenaLoader(folder, this);
 		mainLobby = arenaLoader.getMainLobby();
 		if (mainLobby != null) {
-			arenaLoader.loadArenas().forEach(arena -> arenasManager.addArena(arena));
+			arenaLoader.loadArenas().forEach(arenasManager::addArena);
 		}
 		arenasManager.startClock(this, 20);
 	}
@@ -278,6 +284,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		settingsTeams = new SettingsTeams(folder);
 		settingsArena = new SettingsArena(folder);
 		settingsScoreboard = new SettingsScoreboard(folder);
+		settingsShop = new SettingsShop(folder);
 	}
 
 	private void loadManagers() throws NoSuchMethodException {

@@ -61,6 +61,10 @@ public class ConfigCommands extends Config {
 	private static final String KIT = "kit.";
 	public static final String KIT_HELP = KIT + HELP;
 	public static final String CANT_CHOOSE_KIT_NOW = KIT + "cant-choose-kit-now";
+	
+	private static final String SHOP = "shop.";
+	public static final String SHOP_HELP = SHOP + HELP;
+	public static final String SHOP_EXECUTED = SHOP + EXECUTED;
 
 	public ConfigCommands(File folder) {
 		super(new File(folder, FILE_NAME));
@@ -107,5 +111,8 @@ public class ConfigCommands extends Config {
 		
 		set(KIT_HELP, "Opens again the gui to choose a kit");
 		set(CANT_CHOOSE_KIT_NOW, "&cYou can't choose a kit now! The game already started");
+
+		set(SHOP_HELP, "Adds a Villager shop at your location");
+		set(SHOP_EXECUTED, "Villager shop set");
 	}
 }
