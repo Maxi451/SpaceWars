@@ -23,13 +23,14 @@ public class ShotManager {
 	static {
 		transparentBlocks.add(Material.AIR);
 	}
-	
+
 	public static void onShot(SpaceArena arena, SpacePlayer shooter) {
 		Gun gun = shooter.getKit().getGun();
 		double maxDistance = gun.isLongBarrel() ? 75 : 50;
 		Player player = shooter.getPlayer();
 		Location playerPos = player.getEyeLocation();
 		Location maxDistanceLocation = playerPos.clone().add(playerPos.getDirection().multiply(maxDistance));
+
 		if (!gun.isFmj()) {
 			Location collisionPoint = RayTrace.firstCollisionPoint(playerPos, maxDistanceLocation, transparentBlocks, 0.05);
 			if (collisionPoint != null) {
@@ -37,6 +38,7 @@ public class ShotManager {
 				maxDistance = playerPos.distance(maxDistanceLocation);
 			}
 		}
+
 		SpaceTeam team = shooter.getTeam();
 		double minDistance = Double.MAX_VALUE;
 		SpacePlayer targetFound = null;
@@ -44,9 +46,10 @@ public class ShotManager {
 			if (team == target.getTeam()) {
 				continue;
 			}
+
 			Player targetPlayer = target.getPlayer();
 			boolean isGliding = targetPlayer.isGliding();
-			if (RayTrace.canHit(player, targetPlayer, maxDistance, isGliding ? 0.25 : 0, isGliding)) {
+			if (RayTrace.canHit(player, targetPlayer, maxDistance, isGliding ? 1 : 0, isGliding)) {
 				double distance = playerPos.distance(targetPlayer.getEyeLocation());
 				if (distance < minDistance) {
 					targetFound = target;
@@ -54,16 +57,19 @@ public class ShotManager {
 				}
 			}
 		}
-		if (targetFound != null) {
-			Player targetPlayer = targetFound.getPlayer();
-			arena.onDamage(targetFound, shooter, gun.getDamage(shooter));
-			maxDistanceLocation = targetPlayer.isGliding() ? AABB.getElytraPlayerEyesPos(targetPlayer) : targetPlayer.getEyeLocation();
-		}
+
 		SpacePlayerShotEvent event = new SpacePlayerShotEvent(shooter, targetFound);
 		Bukkit.getPluginManager().callEvent(event);
 		if (event.isCancelled()) {
 			return;
 		}
+
+		if (targetFound != null) {
+			Player targetPlayer = targetFound.getPlayer();
+			arena.onDamage(targetFound, shooter, shooter.getTotalDamage());
+			maxDistanceLocation = targetPlayer.isGliding() ? AABB.getElytraPlayerEyesPos(targetPlayer) : targetPlayer.getEyeLocation();
+		}
+
 		ParticlesHelper.particlesLineColored(playerPos, maxDistanceLocation, 0.25, shooter.getTeam().getArmorColor(), 1);
 		Sound sound = gun.getSound();
 		if (sound != null) {

@@ -113,11 +113,11 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	}
 
 	public double getTotalArmor(double armorIgnoredPercentage) {
-		return Math.max((kit.getArmor() + bonusArmor) * (1 + bonusArmorPercentage) * (1 - armorIgnoredPercentage), 0);
+		return Math.max((kit.getArmor(this) + bonusArmor) * (1 + bonusArmorPercentage) * (1 - armorIgnoredPercentage), 0);
 	}
 
 	public double getTotalDamage() {
-		return (kit.getGun().getDamage() + bonusDamage) * (1 + bonusDamagePercentage);
+		return (kit.getGun().getDamage(this) + bonusDamage) * (1 + bonusDamagePercentage);
 	}
 
 	public double getBonusIgnoredArmor() {

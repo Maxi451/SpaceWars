@@ -18,8 +18,8 @@ public class GunSniper extends Gun {
 	}
 	
 	@Override
-	public double getTargetArmorReduced(double baseArmor, double bonusArmor) {
-		return bonusArmor * (1 - settings.getSniperEnemyBonusArmorIgnoredPercentage());
+	public double getTargetArmorReducedPercentage() {
+		return settings.getSniperEnemyBonusArmorIgnoredPercentage();
 	}
 
 	@Override

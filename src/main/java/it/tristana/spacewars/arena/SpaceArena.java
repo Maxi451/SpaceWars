@@ -31,7 +31,6 @@ import it.tristana.commons.interfaces.util.TickablesManager;
 import it.tristana.commons.scoreboard.ScoreboardManager;
 import it.tristana.spacewars.Main;
 import it.tristana.spacewars.arena.player.SpacePlayer;
-import it.tristana.spacewars.arena.player.kit.Kit;
 import it.tristana.spacewars.arena.player.kit.KitsManager;
 import it.tristana.spacewars.arena.powerup.PowerupsBuilder;
 import it.tristana.spacewars.arena.shop.SpaceVillagerShop;
@@ -243,13 +242,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	}
 
 	public void onDamage(SpacePlayer player, SpacePlayer damager, double damage) {
-		Kit kit = player.getKit();
-		double totalArmor = kit.getArmor(player);
-		if (damager != null) {
-			double baseArmor = kit.getBaseArmor();
-			double bonusArmor = totalArmor - baseArmor;
-			totalArmor -= damager.getKit().getGun().getTargetArmorReduced(baseArmor, bonusArmor);
-		}
+		double totalArmor = damager == null ? player.getTotalArmor() : (player.getTotalArmor(damager.getBonusIgnoredArmorPercentage()) - damager.getBonusIgnoredArmor());
 		onTrueDamage(player, damager, 100d / Math.max(1, 100 + totalArmor) * damage);
 	}
 
