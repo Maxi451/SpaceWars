@@ -14,6 +14,7 @@ import it.tristana.spacewars.arena.SpaceArena;
 import it.tristana.spacewars.arena.player.kit.Kit;
 import it.tristana.spacewars.arena.team.SpaceTeam;
 import it.tristana.spacewars.database.SpaceUser;
+import it.tristana.spacewars.gui.shop.ShopElement;
 
 public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> implements Tickable, Shootable, BalanceHolder {
 
@@ -34,11 +35,14 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	private double money;
 	private int ticksForFuel;
 	private int ticksToRespawn;
+	
+	private ElementsCounter<ShopElement> itemsManager;
 
 	public SpacePlayer(SpaceArena arena, SpaceUser user) {
 		super(arena, user.getPlayer().getPlayer());
 		this.user = user;
-		ticksForFuel = TICKS_FOR_FUEL;
+		this.ticksForFuel = TICKS_FOR_FUEL;
+		this.itemsManager = new ElementsCounter<>();
 	}
 
 	@Override
@@ -90,6 +94,14 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		PlayerInventory inventory = player.getInventory();
 		inventory.setArmorContents(team.getArmor());
 		kit.giveItems(inventory);
+	}
+	
+	public void buyItem(Class<? extends ShopElement> clazz) {
+		itemsManager.addElement(clazz);
+	}
+	
+	public int getItemLevel(Class<? extends ShopElement> clazz) {
+		return itemsManager.getAmount(clazz);
 	}
 
 	public void onLife() {

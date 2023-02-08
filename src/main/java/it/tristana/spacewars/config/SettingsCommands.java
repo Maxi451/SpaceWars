@@ -42,9 +42,12 @@ public class SettingsCommands extends Settings<ConfigCommands> {
 
 	private String leaveHelp;
 	private String leaveExecuted;
-	
+
 	private String kitHelp;
 	private String cantChooseKitNow;
+
+	private String shopHelp;
+	private String shopExecuted;
 
 	public SettingsCommands(File folder) {
 		super(folder, ConfigCommands.class);
@@ -91,6 +94,17 @@ public class SettingsCommands extends Settings<ConfigCommands> {
 
 		kitHelp = config.getString(ConfigCommands.KIT_HELP);
 		cantChooseKitNow = config.getString(ConfigCommands.CANT_CHOOSE_KIT_NOW);
+
+		shopHelp = config.getString(ConfigCommands.SHOP_HELP);
+		shopExecuted = config.getString(ConfigCommands.SHOP_EXECUTED);
+	}
+
+	public String getShopHelp() {
+		return shopHelp;
+	}
+
+	public String getShopExecuted() {
+		return shopExecuted;
 	}
 
 	public String getKitHelp() {

@@ -30,4 +30,9 @@ public class ShopElementArmor extends ShopElement {
 	protected ItemStack getRawDisplayItem(Player player) {
 		return new ItemStack(Material.IRON_CHESTPLATE);
 	}
+
+	@Override
+	protected int getMaxLevel() {
+		return settings.getArmorMaxLevel();
+	}
 }

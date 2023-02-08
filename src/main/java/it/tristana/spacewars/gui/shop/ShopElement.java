@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import org.bukkit.entity.Player;
 
 import it.tristana.commons.gui.BasicElement;
+import it.tristana.commons.helper.CommonsHelper;
 import it.tristana.commons.interfaces.arena.ArenasManager;
 import it.tristana.commons.interfaces.shop.ShopItem;
 import it.tristana.spacewars.arena.SpaceArena;
@@ -37,7 +38,16 @@ public abstract class ShopElement extends BasicElement implements ShopItem<Space
 			return;
 		}
 
-		doAction(arena.getArenaPlayer(player));
+		SpacePlayer spacePlayer = arena.getArenaPlayer(player);
+		int maxLevel = getMaxLevel();
+		if (maxLevel >= 0) {
+			int level = spacePlayer.getItemLevel(this.getClass());
+			if (level >= maxLevel) {
+				CommonsHelper.info(player, settingsMessages);
+			}
+		}
+		
+		doAction(spacePlayer);
 	}
 
 	@Override
@@ -52,4 +62,6 @@ public abstract class ShopElement extends BasicElement implements ShopItem<Space
 	}
 
 	protected abstract boolean run(SpacePlayer spacePlayer);
+	
+	protected abstract int getMaxLevel();
 }

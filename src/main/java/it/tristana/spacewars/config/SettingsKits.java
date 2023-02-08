@@ -8,6 +8,8 @@ import it.tristana.commons.helper.CommonsHelper;
 
 public class SettingsKits extends Settings<ConfigKits> {
 
+	private String guiName;
+	
 	private String minerName;
 	private List<String> minerLore;
 	private double minerArmor;
@@ -51,6 +53,8 @@ public class SettingsKits extends Settings<ConfigKits> {
 	
 	@Override
 	protected void reload(ConfigKits config) {
+		guiName = config.getString(ConfigKits.GUI_NAME);
+		
 		minerName = config.getString(ConfigKits.MINER_NAME);
 		minerLore = config.getList(ConfigKits.MINER_LORE);
 		minerArmor = CommonsHelper.parseDoubleOrGetDefault(config.getString(ConfigKits.MINER_ARMOR), 33);
@@ -87,6 +91,10 @@ public class SettingsKits extends Settings<ConfigKits> {
 		defenderBonusDamagePercentage = CommonsHelper.parseDoubleOrGetDefault(config.getString(ConfigKits.DEFENDER_BONUS_DAMAGE_PERCENTAGE), 15) / 100;
 		defenderBonusReloadPercentage = CommonsHelper.parseDoubleOrGetDefault(config.getString(ConfigKits.DEFENDER_BONUS_RELOAD_PERCENTAGE), 20) / 100;
 		defenderMaxNexusDistance = CommonsHelper.parseDoubleOrGetDefault(config.getString(ConfigKits.DEFENDER_MAX_NEXUS_DISTANCE), 24);
+	}
+
+	public String getGuiName() {
+		return guiName;
 	}
 
 	public String getSniperName() {

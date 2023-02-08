@@ -15,6 +15,9 @@ public class SettingsMessages extends Settings<ConfigMessages> {
 	private String moneyGained;
 	private String playerGotPowerup;
 	private String kitChosen;
+	private String notEnoughMoney;
+	private String maxItemLevelReached;
+	private String itemBought;
 
 	public SettingsMessages(File folder) {
 		super(folder, ConfigMessages.class);
@@ -31,6 +34,21 @@ public class SettingsMessages extends Settings<ConfigMessages> {
 		moneyGained = config.getString(ConfigMessages.MONEY_GAINED);
 		playerGotPowerup = config.getString(ConfigMessages.PLAYER_GOT_POWERUP);
 		kitChosen = config.getString(ConfigMessages.KIT_CHOSEN);
+		notEnoughMoney = config.getString(ConfigMessages.NOT_ENOUGH_MONEY);
+		maxItemLevelReached = config.getString(ConfigMessages.MAX_ITEM_LEVEL_REACHED);
+		itemBought = config.getString(ConfigMessages.ITEM_BOUGHT);
+	}
+
+	public String getNotEnoughMoney() {
+		return notEnoughMoney;
+	}
+
+	public String getMaxItemLevelReached() {
+		return maxItemLevelReached;
+	}
+
+	public String getItemBought() {
+		return itemBought;
 	}
 
 	public String getPlayerGotPowerup() {
