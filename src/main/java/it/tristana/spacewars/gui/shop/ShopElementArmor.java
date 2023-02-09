@@ -1,6 +1,5 @@
 package it.tristana.spacewars.gui.shop;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -30,6 +29,6 @@ public class ShopElementArmor extends ShopElement {
 
 	@Override
 	protected ItemStack getRawDisplayItem(Player player) {
-		return new ItemStack(Material.IRON_CHESTPLATE);
+		return new ItemStack(settingsShop.getArmorIcon());
 	}
 }

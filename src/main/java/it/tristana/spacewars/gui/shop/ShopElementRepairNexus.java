@@ -1,7 +1,5 @@
 package it.tristana.spacewars.gui.shop;
 
-import java.util.List;
-
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -37,6 +35,6 @@ public class ShopElementRepairNexus extends ShopElement {
 
 	@Override
 	protected ItemStack getRawDisplayItem(Player player) {
-		return new ItemStack(Material.OBSIDIAN);
+		return new ItemStack(settingsShop.getRepairNexusIcon());
 	}
 }

@@ -46,18 +46,16 @@ public abstract class ShopElement extends BasicElement implements ShopItem<Space
 		int maxLevel = getMaxLevel();
 		Class<? extends ShopElement> clazz = getClass();
 		boolean isTeamUpgrade = isTeamUpgrade();
-		if (maxLevel >= 0) {
-			int level = spacePlayer.getItemLevel(clazz, isTeamUpgrade);
-			if (level >= maxLevel) {
-				CommonsHelper.info(player, CommonsHelper.replaceAll(settingsMessages.getMaxItemLevelReached(), "{item}", name));
-				player.closeInventory();
-				return;
-			}
+		int level = spacePlayer.getItemLevel(clazz, isTeamUpgrade);
+		if (maxLevel >= 0 && level >= maxLevel) {
+			CommonsHelper.info(player, CommonsHelper.replaceAll(settingsMessages.getMaxItemLevelReached(), "{item}", name));
+			player.closeInventory();
+			return;
 		}
 
-		int price = (int) getPrice();
+		double price = getPrice() * Math.pow(settingsShop.getPricePerLevelIncreasePercentage() + 1, level);
 		if (!spacePlayer.tryToPay(price)) {
-			CommonsHelper.info(player, CommonsHelper.replaceAll(settingsMessages.getNotEnoughMoney(), "{money}", String.valueOf(price - (int) spacePlayer.getMoney())));
+			CommonsHelper.info(player, CommonsHelper.replaceAll(settingsMessages.getNotEnoughMoney(), "{money}", String.valueOf((int) (price - spacePlayer.getMoney()))));
 			player.closeInventory();
 			return;
 		}
@@ -76,7 +74,7 @@ public abstract class ShopElement extends BasicElement implements ShopItem<Space
 	public final String getName() {
 		return name;
 	}
-	
+
 	public boolean isTeamUpgrade() {
 		return false;
 	}
