@@ -18,6 +18,7 @@ public class ConfigMessages extends Config {
 	public static final String NOT_ENOUGH_MONEY = "not-enough-money";
 	public static final String MAX_ITEM_LEVEL_REACHED = "max-item-level-reached";
 	public static final String ITEM_BOUGHT = "item-bought";
+	public static final String CANT_BUY_THIS_NOW = "cant-buy-this-now";
 
 	public ConfigMessages(File folder) {
 		super(new File(folder, "messages.yml"));
@@ -37,5 +38,6 @@ public class ConfigMessages extends Config {
 		set(NOT_ENOUGH_MONEY, "&cYou need {money} more money!");
 		set(MAX_ITEM_LEVEL_REACHED, "&cYou already reached the maximum level for {item}!");
 		set(ITEM_BOUGHT, "You bought &6{item}");
+		set(CANT_BUY_THIS_NOW, "&cYou can't buy this now!");
 	}
 }

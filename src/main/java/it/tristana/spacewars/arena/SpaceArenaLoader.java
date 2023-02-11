@@ -1,8 +1,10 @@
 package it.tristana.spacewars.arena;
 
 import java.io.File;
-import java.util.List;
+import java.util.Collection;
 import java.util.TreeSet;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -11,12 +13,15 @@ import org.bukkit.configuration.ConfigurationSection;
 
 import it.tristana.commons.arena.loader.BasicArenaLoader;
 import it.tristana.commons.helper.CommonsHelper;
+import it.tristana.commons.interfaces.arena.Arena;
+import it.tristana.commons.interfaces.util.VillagerShop;
 import it.tristana.spacewars.Main;
 
 public class SpaceArenaLoader extends BasicArenaLoader<SpaceArena> {
 
 	private static final String NEXUSES = "nexuses";
 	private static final String SPHERES = "spheres";
+	private static final String SHOPS = "shops";
 
 	private final Main plugin;
 
@@ -33,21 +38,11 @@ public class SpaceArenaLoader extends BasicArenaLoader<SpaceArena> {
 		if (lobby != null) {
 			setLocation(root + LOBBY, lobby);
 		}
-		List<Location> spawnpoints = arena.getSpawnpoints();
-		int size = spawnpoints.size();
-		for (int i = 0; i < size; i ++) {
-			setLocation(root + SPAWNPOINTS + "." + i, spawnpoints.get(i));
-		}
-		List<Location> nexusLocations = arena.getNexusLocations();
-		size = nexusLocations.size();
-		for (int i = 0; i < size; i ++) {
-			setLocation(root + NEXUSES + "." + i, nexusLocations.get(i));
-		}
-		int counter = 0;
-		for (SpherePowerup sphere : arena.getSpheres()) {
-			String path = root + SPHERES + "." + counter;
-			setLocation(path, sphere.getLocation());
-		}
+
+		saveSection(arena, SPAWNPOINTS, arena.getSpawnpoints(), t -> t);
+		saveSection(arena, NEXUSES, arena.getNexusLocations(), t -> t);
+		saveSection(arena, SPHERES, arena.getSpheres(), SpherePowerup::getLocation);
+		saveSection(arena, SHOPS, arena.getShops(), VillagerShop::getLocation);
 	}
 
 	@Override
@@ -59,30 +54,41 @@ public class SpaceArenaLoader extends BasicArenaLoader<SpaceArena> {
 			CommonsHelper.consoleInfo("&cWorld " + worldName + " for arena " + name + " not found!");
 			return null;
 		}
+
 		SpaceArena arena = new SpaceArena(world, name, plugin);
 		ConfigurationSection section = fileConfiguration.getConfigurationSection(root + LOBBY);
 		if (section != null) {
 			arena.setLobby(getLocation(root + LOBBY, world));
 		}
-		section = fileConfiguration.getConfigurationSection(root + SPAWNPOINTS);
-		if (section != null) {
-			new TreeSet<>(section.getKeys(false)).forEach(key -> {
-				arena.setSpawnpoint(getLocation(root + SPAWNPOINTS + "." + key, world));
-			});
-		}
-		section = fileConfiguration.getConfigurationSection(root + NEXUSES);
-		if (section != null) {
-			new TreeSet<>(section.getKeys(false)).forEach(key -> {
-				arena.setNexusLocation(getLocation(root + NEXUSES + "." + key, world));
-			});
-		}
-		section = fileConfiguration.getConfigurationSection(root + SPHERES);
-		if (section != null) {
-			new TreeSet<>(section.getKeys(false)).forEach(key -> {
-				String path = root + SPHERES + "." + key;
-				arena.setSpherePowerup(getLocation(path, world));
-			});
-		}
+
+		loadSection(arena, SPAWNPOINTS, arena::setSpawnpoint);
+		loadSection(arena, NEXUSES, arena::setNexusLocation);
+		loadSection(arena, SPHERES, arena::setSpherePowerup);
+		loadSection(arena, SHOPS, arena::addShop);
 		return arena;
+	}
+
+	private <T> void saveSection(SpaceArena arena, String sectionName, Collection<T> source, Function<T, Location> locationRetriever) {
+		String root = getRoot(arena) + sectionName + ".";
+		int counter = 0;
+		for (T obj : source) {
+			setLocation(root + counter, locationRetriever.apply(obj));
+			counter ++;
+		}
+	}
+
+	private void loadSection(SpaceArena arena, String sectionName, Consumer<Location> reader) {
+		String root = getRoot(arena) + sectionName;
+		World world = arena.getWorld();
+		ConfigurationSection section = fileConfiguration.getConfigurationSection(root);
+		if (section != null) {
+			new TreeSet<>(section.getKeys(false)).forEach(key -> {
+				reader.accept(getLocation(root + "." + key, world));
+			});
+		}
+	}
+
+	private String getRoot(Arena<?> arena) {
+		return getRoot(arena.getName());
 	}
 }

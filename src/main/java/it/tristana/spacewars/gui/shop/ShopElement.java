@@ -60,7 +60,11 @@ public abstract class ShopElement extends BasicElement implements ShopItem<Space
 			return;
 		}
 
-		doAction(spacePlayer);
+		if (!doAction(spacePlayer)) {
+			CommonsHelper.info(player, settingsMessages.getCantBuyThisNow());
+			return;
+		}
+
 		spacePlayer.buyItem(clazz, isTeamUpgrade);
 		CommonsHelper.info(player, CommonsHelper.replaceAll(settingsMessages.getItemBought(), "{item}", name));
 	}

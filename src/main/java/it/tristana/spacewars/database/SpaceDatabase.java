@@ -12,10 +12,11 @@ public class SpaceDatabase extends DatabaseManager<SpaceUser> {
 	private Main plugin;
 	private String tablePlayers;
 
-	public SpaceDatabase(String host, String database, String username, String password, int port, Main plugin, String tablePlayers) {
+	public SpaceDatabase(String host, String database, String username, String password, int port, Main plugin, String tablePlayers) throws SQLException {
 		super(host, database, username, password , port);
 		this.plugin = plugin;
 		this.tablePlayers = tablePlayers;
+		createTables();
 	}
 
 	@Override
@@ -48,7 +49,7 @@ public class SpaceDatabase extends DatabaseManager<SpaceUser> {
 	}
 
 	@Override
-	protected void createTables() throws SQLException {
+	public void createTables() throws SQLException {
 		executeUpdate("CREATE TABLE IF NOT EXISTS " + tablePlayers + "("
 				+ "uuid CHAR(36) PRIMARY KEY,"
 				+ "wins INTEGER NOT NULL DEFAULT 0,"

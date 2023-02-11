@@ -101,7 +101,6 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		folder = getFolder();
 		try {
 			database = getDatabase();
-			database.openConnection();
 		} catch (Exception e) {
 			selfDestroy(e, "&cCould not open the database connection. Did you configure the credentials? Check the errors file");
 			return;
@@ -129,12 +128,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 
 		closeArenas();
 		saveArenas();
-		try {
-			usersManager.saveOnlineUsers();
-			database.closeConnection();
-		} catch (SQLException e) {
-			writeThrowableOnErrorsFile(e);
-		}
+		usersManager.saveOnlineUsers();
 	}
 
 	@Override
@@ -316,7 +310,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		register(new SpaceEventsListener(arenasManager, settingsMessages));
 	}
 
-	private SpaceDatabase getDatabase() {
+	private SpaceDatabase getDatabase() throws SQLException {
 		ConfigSpaceDatabase config = new ConfigSpaceDatabase(folder);
 		String host = config.getString(ConfigSpaceDatabase.HOST);
 		String database = config.getString(ConfigSpaceDatabase.DATABASE);

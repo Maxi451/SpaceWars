@@ -18,6 +18,10 @@ public class SpacePlayersManager extends PlayersManager {
 	
 	@Override
 	protected void hidePlayer(Player p1, Player p2) {
+		if (!plugin.isEnabled()) {
+			return;
+		}
+
 		if (p1 != p2) {
 			p1.hidePlayer(plugin, p2);
 			p2.hidePlayer(plugin, p1);
@@ -26,6 +30,10 @@ public class SpacePlayersManager extends PlayersManager {
 
 	@Override
 	protected void showPlayer(Player p1, Player p2) {
+		if (!plugin.isEnabled()) {
+			return;
+		}
+
 		if (p1 != p2) {
 			p1.showPlayer(plugin, p2);
 			p2.showPlayer(plugin, p1);

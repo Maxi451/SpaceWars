@@ -18,6 +18,7 @@ public class SpaceCommand extends MainCommand<Main> {
 		registerSubCommand(new CommandSpawnpoint(this, "spawnpoint", adminPerms, settingsCommands));
 		registerSubCommand(new CommandNexus(this, "nexus", adminPerms, settingsCommands));
 		registerSubCommand(new CommandSphere(this, "sphere", adminPerms, settingsCommands));
+		registerSubCommand(new CommandShop(this, "shop", adminPerms, settingsCommands));
 
 		registerSubCommand(new CommandJoin(this, "join", null, settingsCommands));
 		registerSubCommand(new CommandLeave(this, "leave", null, settingsCommands));

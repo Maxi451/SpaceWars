@@ -6,7 +6,6 @@ import org.bukkit.entity.Player;
 
 import it.tristana.commons.helper.CommonsHelper;
 import it.tristana.spacewars.arena.SpaceArena;
-import it.tristana.spacewars.arena.shop.SpaceVillagerShop;
 import it.tristana.spacewars.config.SettingsCommands;
 
 public class CommandShop extends SpaceSubCommand {
@@ -24,7 +23,7 @@ public class CommandShop extends SpaceSubCommand {
 			return;
 		}
 
-		arena.addShop(new SpaceVillagerShop(location, plugin.getSettingsShop().getVillagerShopName()));
+		arena.addShop(location);
 		CommonsHelper.info(sender, settings.getShopExecuted());
 	}
 

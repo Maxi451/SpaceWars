@@ -22,9 +22,11 @@ public class CommandSphere extends SpaceSubCommand {
 			CommonsHelper.info(sender, settings.getNoArenaInWorld());
 			return;
 		}
+
+		arena.setSpherePowerup(pos);
 		CommonsHelper.info(sender, settings.getSphereExecuted());
 	}
-	
+
 	@Override
 	protected boolean requiresPlayer() {
 		return true;

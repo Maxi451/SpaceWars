@@ -3,6 +3,7 @@ package it.tristana.spacewars.arena.shop;
 import org.bukkit.Location;
 
 import it.tristana.commons.arena.BasicVillagerShop;
+import it.tristana.commons.helper.CommonsHelper;
 
 public class SpaceVillagerShop extends BasicVillagerShop {
 
@@ -14,6 +15,7 @@ public class SpaceVillagerShop extends BasicVillagerShop {
 	public void spawnEntity() {
 		super.spawnEntity();
 		villager.setVillagerLevel(5);
+		CommonsHelper.broadcast("Spawned at " + CommonsHelper.locationToString(location));
 	}
 	
 	@Override

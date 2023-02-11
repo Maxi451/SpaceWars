@@ -18,6 +18,7 @@ public class SettingsMessages extends Settings<ConfigMessages> {
 	private String notEnoughMoney;
 	private String maxItemLevelReached;
 	private String itemBought;
+	private String cantBuyThisNow;
 
 	public SettingsMessages(File folder) {
 		super(folder, ConfigMessages.class);
@@ -37,6 +38,11 @@ public class SettingsMessages extends Settings<ConfigMessages> {
 		notEnoughMoney = config.getString(ConfigMessages.NOT_ENOUGH_MONEY);
 		maxItemLevelReached = config.getString(ConfigMessages.MAX_ITEM_LEVEL_REACHED);
 		itemBought = config.getString(ConfigMessages.ITEM_BOUGHT);
+		cantBuyThisNow = config.getString(ConfigMessages.CANT_BUY_THIS_NOW);
+	}
+
+	public String getCantBuyThisNow() {
+		return cantBuyThisNow;
 	}
 
 	public String getNotEnoughMoney() {

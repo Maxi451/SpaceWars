@@ -1,6 +1,5 @@
 package it.tristana.spacewars.gui.shop;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -36,5 +35,10 @@ public class ShopElementRepairNexus extends ShopElement {
 	@Override
 	protected ItemStack getRawDisplayItem(Player player) {
 		return new ItemStack(settingsShop.getRepairNexusIcon());
+	}
+
+	@Override
+	public boolean doAction(SpacePlayer balanceHolder) {
+		return !balanceHolder.getTeam().getNexus().isBroken();
 	}
 }
