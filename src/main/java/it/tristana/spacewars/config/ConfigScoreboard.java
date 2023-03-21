@@ -13,6 +13,7 @@ public class ConfigScoreboard extends Config {
 	private static final String LINES = "lines";
 
 	public static final String IS_ENABLED = "is-enabled";
+	public static final String STATS_LOADING = "stats-loading";
 
 	private static final String LOBBY = "lobby.";
 	public static final String LOBBY_NAME = LOBBY + NAME;
@@ -34,14 +35,15 @@ public class ConfigScoreboard extends Config {
 	@Override
 	protected void createDefault() {
 		set(IS_ENABLED, "true");
+		set(STATS_LOADING, "* loading *");
 
-		set(LOBBY_NAME, "SpaceWars");
+		set(LOBBY_NAME, "SpaceWars lobby");
 		set(LOBBY_LINES, Arrays.asList("line1", "line2", "line3"));
 
-		set(PRE_GAME_NAME, "SpaceWars");
+		set(PRE_GAME_NAME, "SpaceWars pre game");
 		set(PRE_GAME_LINES, Arrays.asList("line4", "line5", "line6"));
 
-		set(GAME_NAME, "SpaceWars");
+		set(GAME_NAME, "SpaceWars game");
 		set(GAME_LINES, Arrays.asList("line1", TEAMS_PLACEHOLDER, "line3"));
 		set(GAME_TEAM, "{team color}{team name} &f- &6{lives} &f[{has nexus}&f]");
 	}

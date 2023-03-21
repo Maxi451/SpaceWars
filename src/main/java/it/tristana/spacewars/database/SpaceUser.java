@@ -1,6 +1,6 @@
 package it.tristana.spacewars.database;
 
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 
 import it.tristana.commons.database.BasicUser;
 
@@ -10,19 +10,18 @@ public class SpaceUser extends BasicUser {
 	private int kills;
 	private int deaths;
 	private int games;
-	
-	SpaceUser(Player player) {
-		this(player, 0, 0, 0, 0);
-	}
-	
-	SpaceUser(Player player, int wins, int kills, int deaths, int games) {
+
+	SpaceUser(OfflinePlayer player) {
 		super(player);
+	}
+
+	public void setup(int wins, int kills, int deaths, int games) {
 		this.wins = wins;
 		this.kills = kills;
 		this.deaths = deaths;
 		this.games = games;
 	}
-	
+
 	public void onWin() {
 		wins ++;
 	}
@@ -34,11 +33,11 @@ public class SpaceUser extends BasicUser {
 	public void onKill() {
 		kills ++;
 	}
-	
+
 	public int getKills() {
 		return kills;
 	}
-	
+
 	public void onDeath() {
 		deaths ++;
 	}
@@ -46,7 +45,7 @@ public class SpaceUser extends BasicUser {
 	public int getDeaths() {
 		return deaths;
 	}
-	
+
 	public void onGame() {
 		games ++;
 	}

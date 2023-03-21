@@ -33,15 +33,15 @@ public abstract class Kit implements Reloadable {
 		armor = getBaseArmor();
 	}
 	
-	public final void giveItems(Inventory inventory) {
-		inventory.addItem(getGun().getItem(), getPickaxe());
-	}
-	
 	public final Gun getGun() {
 		if (gun == null) {
 			gun = forgeGun();
 		}
 		return gun;
+	}
+	
+	public void giveItems(Inventory inventory) {
+		inventory.addItem(getGun().getItem(), getPickaxe());
 	}
 	
 	public double getArmor(SpacePlayer player) {

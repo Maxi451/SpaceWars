@@ -51,10 +51,12 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 		if (-- ticksToRespawn > 0) {
 			return;
 		}
+
 		if (ticksToRespawn == 0) {
 			respawn();
 			return;
 		}
+
 		checkFuel();
 	}
 
@@ -184,8 +186,12 @@ public class SpacePlayer extends BasicArenaPlayer<SpaceTeam, SpaceArena> impleme
 	public void upgradePickaxe() {
 		kit.upgradePickaxe();
 		int slot = getPickaxeSlot();
+		PlayerInventory inventory = player.getInventory();
+		ItemStack pickaxe = kit.getPickaxe();
 		if (slot >= 0) {
-			player.getInventory().setItem(slot, kit.getPickaxe());
+			inventory.setItem(slot, pickaxe);
+		} else {
+			inventory.addItem(pickaxe);
 		}
 	}
 

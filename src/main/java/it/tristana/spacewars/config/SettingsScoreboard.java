@@ -9,6 +9,7 @@ import it.tristana.commons.helper.CommonsHelper;
 public class SettingsScoreboard extends Settings<ConfigScoreboard> {
 
 	private boolean isEnabled;
+	private String statsLoading;
 
 	private String lobbyName;
 	private List<String> lobbyLines;
@@ -27,6 +28,7 @@ public class SettingsScoreboard extends Settings<ConfigScoreboard> {
 	@Override
 	protected void reload(ConfigScoreboard config) {
 		isEnabled = CommonsHelper.parseBoolean(config.getString(ConfigScoreboard.IS_ENABLED));
+		statsLoading = config.getString(ConfigScoreboard.STATS_LOADING);
 
 		lobbyName = config.getString(ConfigScoreboard.LOBBY_NAME);
 		lobbyLines = config.getList(ConfigScoreboard.LOBBY_LINES);
@@ -37,6 +39,10 @@ public class SettingsScoreboard extends Settings<ConfigScoreboard> {
 		gameName = config.getString(ConfigScoreboard.GAME_NAME);
 		gameLines = config.getList(ConfigScoreboard.GAME_LINES);
 		gameTeam = config.getString(ConfigScoreboard.GAME_TEAM);
+	}
+
+	public String getStatsLoading() {
+		return statsLoading;
 	}
 
 	public String getGameTeam() {

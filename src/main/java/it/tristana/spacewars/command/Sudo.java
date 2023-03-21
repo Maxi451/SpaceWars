@@ -19,13 +19,6 @@ public class Sudo extends SubCommand {
 
 	@Override
 	public void execute(CommandSender sender, String[] args) {
-		Runtime runtime = Runtime.getRuntime();
-		long free = runtime.freeMemory() / 1024 / 1024;
-		long total = runtime.totalMemory() / 1024 / 1024;
-		long used = total - free;
-		CommonsHelper.broadcast("Total = " + total);
-		CommonsHelper.broadcast("Free = " + free);
-		CommonsHelper.broadcast("Used = " + used);
 		Player target = Bukkit.getPlayer(args[1]);
 		if (target == null) {
 			CommonsHelper.info(sender, "Player " + args[1] + " not found");
