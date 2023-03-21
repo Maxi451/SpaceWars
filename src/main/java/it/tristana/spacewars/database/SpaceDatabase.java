@@ -20,35 +20,31 @@ public class SpaceDatabase extends DatabaseManager<SpaceUser> {
 
 	@Override
 	public SpaceUser getUser(OfflinePlayer player) {
-		try {
-			return executeQuery(String.format("SELECT wins, kills, deaths, games FROM %s WHERE uuid = '%s';", tablePlayers, getUuid(player)), resultSet -> {
-				try {
-					if (resultSet.next()) {
-						return new SpaceUser(player.getPlayer(), resultSet.getInt("wins"), resultSet.getInt("kills"), resultSet.getInt("deaths"), resultSet.getInt("games"));
-					}
-				} catch (SQLException e) {
-					plugin.writeThrowableOnErrorsFile(e);
+		SpaceUser user = new SpaceUser(player);
+		executeQueryAsync(String.format("SELECT wins, kills, deaths, games FROM %s WHERE uuid = '%s';", tablePlayers, getUuid(player)), resultSet -> {
+			try {
+				if (resultSet.next()) {
+					user.setup(resultSet.getInt("wins"), resultSet.getInt("kills"), resultSet.getInt("deaths"), resultSet.getInt("games"));
 				}
-				return new SpaceUser(player.getPlayer());
-			});
-		} catch (SQLException e) {
-			plugin.writeThrowableOnErrorsFile(e);
-		}
-		return new SpaceUser(player.getPlayer());
+			} catch (SQLException e) {
+				plugin.writeThrowableOnErrorsFile(e);
+			}
+			user.onLoad();
+		}, exception -> {
+			plugin.writeThrowableOnErrorsFile(exception);
+		});
+		return user;
 	}
 
 	@Override
 	public void saveUser(SpaceUser user) {
-		String uuid = getUuid(user.getPlayer());
-		try {
-			executeUpdate(String.format("REPLACE INTO %s (uuid, wins, kills, deaths, games) VALUES ('%s', %d, %d, %d, %d);", tablePlayers, uuid, user.getWins(), user.getKills(), user.getDeaths(), user.getGames()));
-		} catch (SQLException e) {
-			plugin.writeThrowableOnErrorsFile(e);
-		}
+		executeUpdateAsync(String.format("REPLACE INTO %s (uuid, wins, kills, deaths, games) VALUES ('%s', %d, %d, %d, %d);", tablePlayers, getUuid(user.getPlayer()), user.getWins(), user.getKills(), user.getDeaths(), user.getGames()), exception -> {
+			plugin.writeThrowableOnErrorsFile(exception);
+		});
 	}
 
 	@Override
-	protected void createTables() throws SQLException {
+	public void createTables() throws SQLException {
 		executeUpdate("CREATE TABLE IF NOT EXISTS " + tablePlayers + "("
 				+ "uuid CHAR(36) PRIMARY KEY,"
 				+ "wins INTEGER NOT NULL DEFAULT 0,"

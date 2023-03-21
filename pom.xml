@@ -5,6 +5,12 @@
 	<groupId>it.tristana</groupId>
 	<artifactId>SpaceWars</artifactId>
 	<version>1.1.0</version>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
+
 	<repositories>
 		<!-- This adds the Spigot Maven repository to the build -->
 		<repository>
@@ -18,6 +24,7 @@
 			<layout>default</layout>
 		</repository>
 	</repositories>
+
 	<dependencies>
 		<!--This adds the Spigot API artifact to the build -->
 		<dependency>
@@ -32,6 +39,7 @@
 			<version>2.9.1</version>
 		</dependency>
 	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>

@@ -1,7 +1,10 @@
 package it.tristana.spacewars.command;
 
+import org.bukkit.command.CommandSender;
+
 import it.tristana.commons.command.MainCommand;
 import it.tristana.commons.config.SettingsDefaultCommands;
+import it.tristana.commons.helper.CommonsHelper;
 import it.tristana.spacewars.Main;
 import it.tristana.spacewars.config.SettingsCommands;
 
@@ -29,5 +32,16 @@ public class SpaceCommand extends MainCommand<Main> {
 	@Override
 	protected String getAdminPerms() {
 		return Main.ADMIN_PERMS;
+	}
+
+	@Override
+	protected void onEmptyCommand(CommandSender sender) {
+		Runtime runtime = Runtime.getRuntime();
+		long free = runtime.freeMemory() / 1024 / 1024;
+		long total = runtime.totalMemory() / 1024 / 1024;
+		long used = total - free;
+		CommonsHelper.info(sender, "Total = " + total);
+		CommonsHelper.info(sender, "Free = " + free);
+		CommonsHelper.info(sender, "Used = " + used);
 	}
 }

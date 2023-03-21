@@ -41,6 +41,7 @@ import it.tristana.spacewars.config.SettingsArena;
 import it.tristana.spacewars.config.SettingsMessages;
 import it.tristana.spacewars.config.SettingsPowerups;
 import it.tristana.spacewars.config.SettingsScoreboard;
+import it.tristana.spacewars.config.SettingsShop;
 import it.tristana.spacewars.database.SpaceUser;
 import it.tristana.spacewars.gui.kit.GuiKit;
 import it.tristana.spacewars.scoreboard.SpacePersonalScoreboardManager;
@@ -62,6 +63,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	private final SettingsPowerups settingsPowerups;
 	private final SettingsMessages settingsMessages;
 	private final SettingsTeams settingsTeams;
+	private final SettingsShop settingsShop;
 
 	private ScoreboardManager<SpaceUser> preGameScoreboardManager;
 	private ScoreboardManager<SpaceUser> gameScoreboardManager;
@@ -78,6 +80,7 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 		this.settingsPowerups = plugin.getSettingsPowerups();
 		this.settingsMessages = plugin.getSettingsMessages();
 		this.settingsTeams = plugin.getSettingsTeams();
+		this.settingsShop = plugin.getSettingsShop();
 		this.nexusLocations = new ArrayList<>();
 		this.spheres = new HashSet<>();
 		this.shops = new HashSet<>();
@@ -217,8 +220,8 @@ public class SpaceArena extends BasicEnclosedArena<SpaceTeam, SpacePlayer> imple
 	}
 
 	@Override
-	public void addShop(SpaceVillagerShop shop) {
-		shops.add(shop);
+	public void addShop(Location location) {
+		shops.add(new SpaceVillagerShop(location, settingsShop.getVillagerShopName()));
 	}
 
 	public void openGuiMenu(Player player) {

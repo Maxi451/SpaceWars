@@ -1,7 +1,6 @@
 package it.tristana.spacewars;
 
 import java.io.File;
-import java.sql.SQLException;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -64,7 +63,7 @@ import it.tristana.spacewars.listener.SpaceEventsListener;
 import it.tristana.spacewars.scoreboard.SpacePersonalScoreboardManager;
 
 public final class Main extends PluginDraft implements Reloadable, DatabaseHolder, PartiesHolder, MainLobbyHolder {
-
+	
 	public static final String ADMIN_PERMS = "spacewars.admin";
 
 	private static final String COMMAND = "sw";
@@ -101,7 +100,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		folder = getFolder();
 		try {
 			database = getDatabase();
-			database.openConnection();
+			database.closeConnection(database.openConnection());
 		} catch (Exception e) {
 			selfDestroy(e, "&cCould not open the database connection. Did you configure the credentials? Check the errors file");
 			return;
@@ -129,12 +128,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 
 		closeArenas();
 		saveArenas();
-		try {
-			usersManager.saveOnlineUsers();
-			database.closeConnection();
-		} catch (SQLException e) {
-			writeThrowableOnErrorsFile(e);
-		}
+		usersManager.saveOnlineUsers();
 	}
 
 	@Override
@@ -155,7 +149,7 @@ public final class Main extends PluginDraft implements Reloadable, DatabaseHolde
 		clickedGuiManager.clearGuis();
 		registerGuis();
 	}
-
+	
 	@Override
 	public PartiesManager getPartiesManager() {
 		return partiesManager;
